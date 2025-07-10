@@ -11,7 +11,10 @@
   "dependencies": {
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "next": "15.3.5"
+    "next": "15.3.5",
+    "@lucia-auth/adapter-sqlite": "^3.0.2",
+    "better-sqlite3": "^12.1.1",
+    "lucia": "^3.2.2"
   },
   "devDependencies": {
     "typescript": "^5",
