@@ -13,7 +13,7 @@ const initialState: { errors: Errors } = {
   errors: {},
 };
 
-import logo from '../../../public/assets/login.svg';
+import logo from '@/assets/login.svg';
 import Image from 'next/image';
 
 export default function AuthForm({ mode }: AuthFormInterface) {
