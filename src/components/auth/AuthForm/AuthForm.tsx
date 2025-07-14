@@ -2,7 +2,7 @@
 import { auth } from '@/actions/auth-actions';
 import Link from 'next/link';
 
-import type { Errors } from '../../actions/auth-actions';
+import type { Errors } from '../../../actions/auth-actions';
 import { useActionState } from 'react';
 
 interface AuthFormInterface {

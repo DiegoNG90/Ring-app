@@ -1,6 +1,6 @@
 import { logout } from '@/actions/auth-actions';
 import '../globals.css';
-import SignoutButton from '@/components/auth/SignOutButton/SignoutButton';
+import SignoutButton from '@/components/auth/SignOutButton';
 
 export const metadata = {
   title: 'Training!',
