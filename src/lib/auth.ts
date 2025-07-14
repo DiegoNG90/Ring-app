@@ -19,13 +19,10 @@ const lucia = new Lucia(adapter, {
 });
 
 export async function createAuthSession(userId: number) {
-  console.log("userId", userId)
-  console.log("typeof userId", typeof userId)  
-  
-  const session = await lucia.createSession((userId).toString(), {});
+  const session = await lucia.createSession(userId.toString(), {});
   const sessionCookie = lucia.createSessionCookie(session.id);
   const cookieStore = await cookies();
-  
+
   cookieStore.set(
     sessionCookie.name,
     sessionCookie.value,
@@ -34,7 +31,7 @@ export async function createAuthSession(userId: number) {
 }
 
 export async function verifyAuth() {
-  const cookieStore = await cookies()
+  const cookieStore = await cookies();
   const sessionCookie = cookieStore.get(lucia.sessionCookieName);
 
   if (!sessionCookie) {
@@ -59,7 +56,7 @@ export async function verifyAuth() {
     if (result.session && result.session.fresh) {
       const sessionCookie = lucia.createSessionCookie(result.session.id);
 
-      const cookieStore = await cookies()
+      const cookieStore = await cookies();
       cookieStore.set(
         sessionCookie.name,
         sessionCookie.value,
@@ -68,8 +65,8 @@ export async function verifyAuth() {
     }
     if (!result.session) {
       const sessionCookie = lucia.createBlankSessionCookie();
-      
-      const cookieStore = await cookies()
+
+      const cookieStore = await cookies();
       cookieStore.set(
         sessionCookie.name,
         sessionCookie.value,
@@ -94,8 +91,7 @@ export async function destroySession() {
 
   const sessionCookie = lucia.createBlankSessionCookie();
 
-     
-  const cookieStore = await cookies()
+  const cookieStore = await cookies();
   cookieStore.set(
     sessionCookie.name,
     sessionCookie.value,
