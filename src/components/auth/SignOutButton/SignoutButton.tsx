@@ -5,13 +5,18 @@ import logo from '@/assets/logout.svg';
 import Image from 'next/image';
 import Popover from './Popover/Popover';
 import { useWindowSize } from '@/hooks/useWindowSize';
+import { LAYOUT_BREAKPOINTS } from '@/types/layout';
 
 function SignoutButton() {
   const [showPopover, setShowPopover] = React.useState(false);
   const size = useWindowSize();
 
   function handleShowPopover() {
-    if (size.width !== undefined && size.width < 380) return;
+    if (
+      size.width !== undefined &&
+      size.width < LAYOUT_BREAKPOINTS.SMALL_MOBILE
+    )
+      return;
     setShowPopover(true);
   }
 

@@ -144,8 +144,8 @@ ul {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  max-width: 50rem;
-  margin: 2rem auto;
+  max-width: 100%;
+  margin: 2rem 2rem;
 }
 
 #auth-header p {
