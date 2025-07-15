@@ -1,6 +1,5 @@
 import React from 'react';
-
-import SignoutButton from '@/components/auth/SignOutButton';
+import SignoutButton from './components/SignOutButton';
 import Image from 'next/image';
 
 import boxingGloveLogo from '@/assets/boxing-glove.svg';
