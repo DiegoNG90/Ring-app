@@ -1,19 +1,20 @@
-'use client';
 import React from 'react';
 import { Button } from '@/components/ui/button';
+import { verifyAuth } from '@/lib/auth';
+import { redirect } from 'next/navigation';
+import BellButton from '@/components/training/BellButton';
 
-export default function TrainingPage() {
-  const playBell = () => {
-    const audio = new Audio('/sounds/boxing-bell.ogg');
-    audio.play().catch(console.error);
-    audio.volume = 0.5;
-  };
+export default async function TrainingPage() {
+  const result = await verifyAuth();
+
+  if (!result.user) {
+    return redirect('/');
+  }
+
   return (
     <section>
       <h1>Training Page</h1>
-      <Button variant="destructive" onClick={playBell}>
-        Ring!
-      </Button>
+      <BellButton />
       <Button
         variant="outline"
         className="text-white bg-teal-500 hover:bg-teal-300 hover:text-white cursor-pointer"
