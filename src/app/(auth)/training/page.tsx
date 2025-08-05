@@ -2,8 +2,9 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { verifyAuth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
-import SoundButton from '@/components/training/SoundButton';
+// import SoundButton from '@/components/training/SoundButton';
 import CountdownTimer from '@/components/training/CountdownTimer/CountdownTimer';
+import { getAllTrainingsByUserId } from '@/lib/trainings';
 
 export default async function TrainingPage() {
   const result = await verifyAuth();
@@ -11,14 +12,16 @@ export default async function TrainingPage() {
   if (!result.user) {
     return redirect('/');
   }
+  const trainings = getAllTrainingsByUserId(1);
 
+  console.log('trainings', trainings);
   return (
     <section>
       <h1>Training Page</h1>
-      <div className="flex justify-center items-center h-screen">
+      <div className="flex justify-center items-center py-3">
         <CountdownTimer initialMinutes={0} initialSeconds={4} />
       </div>
-      <SoundButton soundSrc="/sounds/boxing-bell.ogg" />
+      {/* <SoundButton soundSrc="/sounds/boxing-bell.ogg" /> */}
       <Button
         variant="outline"
         className="text-white bg-teal-500 hover:bg-teal-300 hover:text-white cursor-pointer"
