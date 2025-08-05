@@ -2,7 +2,7 @@
 
 import { createAuthSession, destroySession } from '@/lib/auth';
 import { hashUserPassword, verifyPassword } from '@/lib/hash';
-import { createUser, getUserByEmail } from '@/lib/user';
+import { createUser, getUserByEmail } from '@/lib/repositories/user';
 import { redirect } from 'next/navigation';
 
 export interface Errors {

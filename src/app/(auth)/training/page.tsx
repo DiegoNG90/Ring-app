@@ -4,7 +4,7 @@ import { verifyAuth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 // import SoundButton from '@/components/training/SoundButton';
 import CountdownTimer from '@/components/training/CountdownTimer/CountdownTimer';
-import { getAllTrainingsByUserId } from '@/lib/trainings';
+import { getAllTrainingsByUserId } from '@/lib/repositories/trainings';
 
 export default async function TrainingPage() {
   const result = await verifyAuth();
