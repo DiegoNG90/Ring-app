@@ -9,7 +9,10 @@ interface CountdownTimerProps {
   onComplete?: () => void;
 }
 
-import { playSound } from '@/lib/sound';
+import { Sound } from '@/lib/sound';
+
+const BellSound = new Sound('/sounds/boxing-bell.ogg', 0.3);
+const TripleBellSound = new Sound('/sounds/boxing-triple-bells.ogg', 0.1);
 
 export default function CountdownTimer({
   initialMinutes = 0,
@@ -27,14 +30,11 @@ export default function CountdownTimer({
       intervalRef.current = setInterval(() => {
         setTimeLeft((prev) => {
           if (initialSeconds > 5 && prev === 5000) {
-            playSound({
-              soundSrc: '/sounds/boxing-triple-bells.ogg',
-              volume: 0.1,
-            });
+            TripleBellSound.play();
           }
           if (prev <= 10) {
             if (onComplete) onComplete();
-            playSound({ soundSrc: '/sounds/boxing-bell.ogg', volume: 0.3 });
+            BellSound.play();
             setIsRunning(false);
             return 0;
           }
@@ -60,6 +60,8 @@ export default function CountdownTimer({
   const handleStop = () => {
     setIsRunning(false);
     setTimeLeft(initialTime);
+    BellSound.stop();
+    TripleBellSound.stop();
   };
 
   const minutes = Math.floor(timeLeft / 60000);
@@ -67,7 +69,7 @@ export default function CountdownTimer({
   const milliseconds = Math.floor((timeLeft % 1000) / 10);
 
   return (
-    <div className="bg-black text-white rounded-lg p-4 text-center font-mono space-y-4">
+    <div className="bg-black text-white rounded-lg p-4 text-center font-mono space-y-4 w-80">
       <div>
         {initialMinutes !== 0 && (
           <span className="text-4xl">{String(minutes).padStart(2, '0')}:</span>
