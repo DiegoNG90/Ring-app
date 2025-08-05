@@ -1,4 +1,4 @@
-import db from './db';
+import db from '../db';
 
 export function createUser(email: string, password: string) {
   const result = db

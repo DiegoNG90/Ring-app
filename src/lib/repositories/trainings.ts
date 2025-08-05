@@ -1,4 +1,4 @@
-import db from './db';
+import db from '../db';
 
 export function getAllTrainingsByUserId(userId: number) {
   const result = db
