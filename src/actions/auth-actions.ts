@@ -67,19 +67,17 @@ export async function login(prevState: unknown, formData: FormData) {
 
   const existingUser = getUserByEmail(email);
 
+  const errors: Errors = {
+    email: 'Could not find user, please check credentials.',
+  };
+
   if (!existingUser) {
     return {
-      errors: {
-        email: 'Could not find user, please check credentials.',
-      },
+      errors,
     };
   }
 
   const isValidPassword = verifyPassword(existingUser.password, password);
-
-  const errors: Errors = {
-    email: 'Could not find user, please check credentials.',
-  };
 
   if (!isValidPassword) {
     return {
