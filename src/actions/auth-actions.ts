@@ -1,7 +1,7 @@
 'use server';
 
-import { createAuthSession, destroySession } from '@/lib/auth';
-import { hashUserPassword, verifyPassword } from '@/lib/hash';
+import { createAuthSession, destroySession } from '@/lib/auth/auth';
+import { hashUserPassword, verifyPassword } from '@/lib/utils/hash';
 import { createUser, getUserByEmail } from '@/lib/repositories/user';
 import { redirect } from 'next/navigation';
 
