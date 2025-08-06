@@ -1,6 +1,7 @@
 import db from '../db';
+import { Training } from '@/types/Trainings';
 
-export function getAllTrainingsByUserId(userId: number) {
+export function getAllTrainingsByUserId(userId: number): Training[] {
   const result = db
     .prepare(
       `
@@ -19,7 +20,7 @@ export function getAllTrainingsByUserId(userId: number) {
         ORDER BY t.id, tr.round_number;
       `
     )
-    .all(userId);
+    .all(userId) as Training[];
 
   return result;
 }
