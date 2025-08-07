@@ -18,7 +18,9 @@ db.exec(`
   CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY,
     email TEXT UNIQUE,
-    password TEXT
+    password TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   );
 `);
 
@@ -35,6 +37,10 @@ db.exec(`
     user_id INTEGER,
     title TEXT,
     description TEXT,
+    times_completed INTEGER DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_completed_at TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id)
   );
 `);
