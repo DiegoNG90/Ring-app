@@ -1,5 +1,5 @@
 import AuthForm from '@/components/auth/AuthForm';
-import { verifyAuth } from '@/lib/auth';
+import { verifyAuth } from '@/lib/auth/auth';
 import { redirect } from 'next/navigation';
 
 interface PageProps {
