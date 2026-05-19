@@ -65,6 +65,14 @@ export async function login(prevState: unknown, formData: FormData) {
   const email = formData.get('email');
   const password = formData.get('password');
 
+  if (process.env.AUTH_DEBUG === '1') {
+    console.log('[AUTH_DEBUG] intento de login', {
+      email,
+      password:
+        typeof password === 'string' ? password : String(password ?? ''),
+    });
+  }
+
   const existingUser = getUserByEmail(email);
 
   const errors: Errors = {
@@ -92,7 +100,7 @@ export async function login(prevState: unknown, formData: FormData) {
 export async function auth(
   mode: string,
   prevState: unknown,
-  formData: FormData
+  formData: FormData,
 ) {
   if (mode === 'login') {
     return login(prevState, formData);

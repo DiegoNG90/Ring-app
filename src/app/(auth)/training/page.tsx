@@ -33,9 +33,9 @@ export default async function TrainingPage() {
       <h1>Training Page</h1>
 
       {/* Esto deberia volar luego y reacomodarlo en otro lado */}
-      <div className="flex justify-center items-center py-3">
+      {/* <div className='flex justify-center items-center py-3'>
         <CountdownTimer initialMinutes={0} initialSeconds={4} />
-      </div>
+      </div> */}
 
       <TrainingRoutinesList trainings={trainings} />
     </section>

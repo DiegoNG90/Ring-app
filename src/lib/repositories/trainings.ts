@@ -18,14 +18,14 @@ export function getAllTrainingsByUserId(userId: number): Training[] {
         INNER JOIN training_rounds tr ON t.id = tr.training_id  
         WHERE t.user_id = ? 
         ORDER BY t.id, tr.round_number;
-      `
+      `,
     )
     .all(userId) as Training[];
 
   return result;
 }
 
-export function getTrainingById(id: number): Training {
+export function getTrainingById(id: number): Training | undefined {
   const result = db
     .prepare(
       `
@@ -42,9 +42,9 @@ export function getTrainingById(id: number): Training {
         INNER JOIN training_rounds tr ON t.id = tr.training_id  
         WHERE t.id = ? 
         ORDER BY t.id, tr.round_number;
-      `
+      `,
     )
-    .get(id) as Training;
+    .get(id) as Training | undefined;
 
   return result;
 }
