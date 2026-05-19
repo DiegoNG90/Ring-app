@@ -21,6 +21,7 @@ export class Sound {
 
   play(): Promise<void> {
     const audio = this.ensureAudio();
+    audio.currentTime = 0;
     return audio.play().catch(console.error);
   }
 

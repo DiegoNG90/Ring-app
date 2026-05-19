@@ -23,12 +23,16 @@ export default function CountdownTimer({
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const BellSound = useMemo(
-    () => new Sound('/sounds/boxing-bell.ogg', 0.3),
-    []
+    () => new Sound('/sounds/boxing-bell-liviano.mp3', 0.3),
+    [],
   );
   const TripleBellSound = useMemo(
     () => new Sound('/sounds/boxing-triple-bells.ogg', 0.1),
-    []
+    [],
+  );
+  const TripleWoodStickSound = useMemo(
+    () => new Sound('/sounds/maderas_pre_fin_round.mpeg', 0.1),
+    [],
   );
 
   useEffect(() => {
