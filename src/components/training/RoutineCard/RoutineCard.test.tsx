@@ -163,6 +163,58 @@ describe('RoutineCard', () => {
       expect(screen.getByRole('button', { name: /reanudar/i })).toBeInTheDocument();
     });
 
+    it('vuelve al primer round al resetear durante el descanso', async () => {
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      render(
+        <RoutineCard
+          training={createTraining({ round_number: 2, duration_seconds: 2, rest_seconds: 3 })}
+        />,
+      );
+
+      await user.click(screen.getByRole('button', { name: /empezar/i }));
+      await advanceRoutineTimer(2000);
+
+      await waitFor(() => {
+        expect(screen.getByText(/Paso 2 de 3/)).toBeInTheDocument();
+      });
+
+      await user.click(screen.getByRole('button', { name: /reset/i }));
+
+      expect(screen.getByText(/Paso 1 de 3/)).toBeInTheDocument();
+      expect(screen.getByText('Round 1/2')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /empezar/i })).toBeInTheDocument();
+      expect(getMainTimerInSegment('round')).toHaveTextContent('0:02');
+    });
+
+    it('vuelve al primer round al resetear en el segundo round', async () => {
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      render(
+        <RoutineCard
+          training={createTraining({ round_number: 2, duration_seconds: 2, rest_seconds: 3 })}
+        />,
+      );
+
+      await user.click(screen.getByRole('button', { name: /empezar/i }));
+      await advanceRoutineTimer(2000);
+
+      await waitFor(() => {
+        expect(screen.getByText(/Descanso · después del round 1/i)).toBeInTheDocument();
+      });
+
+      await advanceRoutineTimer(3000);
+
+      await waitFor(() => {
+        expect(screen.getByText(/Paso 3 de 3/)).toBeInTheDocument();
+        expect(screen.getByText('Round 2/2')).toBeInTheDocument();
+      });
+
+      await user.click(screen.getByRole('button', { name: /reset/i }));
+
+      expect(screen.getByText(/Paso 1 de 3/)).toBeInTheDocument();
+      expect(screen.getByText('Round 1/2')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /empezar/i })).toBeInTheDocument();
+    });
+
     it('vuelve a mostrar Empezar y permite campana tras reset en el primer paso', async () => {
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       render(

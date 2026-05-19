@@ -132,7 +132,7 @@ interface ActiveSegmentProps {
   cardKey: number;
   hasStarted: boolean;
   onStart?: () => void;
-  onReset?: (segmentIndex: number) => void;
+  onReset?: () => void;
   onPause?: () => void;
   onSegmentStartBell?: () => void;
 }
@@ -253,15 +253,15 @@ function ActiveSegmentCard({
   };
 
   const resetTimer = () => {
+    onReset?.();
+    if (cardKey > 0) return;
+
     setTimeLeft(totalTime);
     setIsRunning(false);
     setIsPaused(false);
     completionFired.current = false;
     preFinishFired.current = false;
-    onReset?.(cardKey);
-    // Tras reset en el primer paso, onStart vuelve a disparar la campana.
-    // En pasos siguientes, la campana suena al reanudar manualmente.
-    segmentStartBellPending.current = cardKey > 0;
+    segmentStartBellPending.current = false;
   };
 
   const segmentTitle =
@@ -363,11 +363,15 @@ function ActiveSegmentCard({
         ) : (
           <div className="grid grid-cols-2 gap-4 text-xs text-zinc-400">
             <div>
-              <div className="font-medium text-orange-300/90">Este descanso</div>
+              <div className="font-medium text-orange-300/90">
+                Este descanso
+              </div>
               <div>{formatTime(training.rest_seconds)}</div>
             </div>
             <div>
-              <div className="font-medium text-orange-300/90">Siguiente round</div>
+              <div className="font-medium text-orange-300/90">
+                Siguiente round
+              </div>
               <div>{formatTime(training.duration_seconds)}</div>
             </div>
           </div>
@@ -451,15 +455,11 @@ export default function RoutineCard({ training }: RoutineCardProps) {
     stopAllSounds();
   }, [stopAllSounds]);
 
-  const handleReset = useCallback(
-    (segmentIndex: number) => {
-      stopAllSounds();
-      if (segmentIndex === 0) {
-        setHasStarted(false);
-      }
-    },
-    [stopAllSounds],
-  );
+  const handleReset = useCallback(() => {
+    stopAllSounds();
+    setCurrentCard(0);
+    setHasStarted(false);
+  }, [stopAllSounds]);
 
   const handleSegmentComplete = useCallback(() => {
     bellSound.play();
@@ -470,8 +470,7 @@ export default function RoutineCard({ training }: RoutineCardProps) {
     woodSound.play();
   }, [woodSound]);
 
-  const isFinished =
-    sequence.length > 0 && currentCard >= sequence.length;
+  const isFinished = sequence.length > 0 && currentCard >= sequence.length;
 
   useEffect(() => {
     if (!isFinished) return;
@@ -485,8 +484,8 @@ export default function RoutineCard({ training }: RoutineCardProps) {
   if (totalRounds < 1) {
     return (
       <p className="text-sm text-zinc-400">
-        Esta rutina no tiene rounds configurados (revisa `round_number` en la base
-        de datos).
+        Esta rutina no tiene rounds configurados (revisa `round_number` en la
+        base de datos).
       </p>
     );
   }
