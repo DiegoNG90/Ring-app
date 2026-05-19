@@ -429,7 +429,7 @@ export default function RoutineCard({ training }: RoutineCardProps) {
   );
 
   const woodSound = useMemo(
-    () => new Sound('/sounds/maderas_pre_fin_round.mpeg', 0.5),
+    () => new Sound('/sounds/maderas_pre_fin_round.mpeg', 1),
     [],
   );
 
