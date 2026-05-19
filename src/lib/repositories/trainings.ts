@@ -48,3 +48,29 @@ export function getTrainingById(id: number): Training | undefined {
 
   return result;
 }
+
+export function deleteTrainingById(
+  trainingId: number,
+  userId: number,
+): boolean {
+  const training = db
+    .prepare('SELECT id, user_id FROM trainings WHERE id = ?')
+    .get(trainingId) as { id: number; user_id: number } | undefined;
+
+  if (!training || training.user_id !== userId) {
+    return false;
+  }
+
+  const deleteRounds = db.prepare(
+    'DELETE FROM training_rounds WHERE training_id = ?',
+  );
+  const deleteTraining = db.prepare('DELETE FROM trainings WHERE id = ?');
+
+  const transaction = db.transaction(() => {
+    deleteRounds.run(trainingId);
+    deleteTraining.run(trainingId);
+  });
+
+  transaction();
+  return true;
+}
