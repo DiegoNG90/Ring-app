@@ -1,8 +1,8 @@
 'use server';
 
-import { createAuthSession, destroySession } from '@/lib/auth';
-import { hashUserPassword, verifyPassword } from '@/lib/hash';
-import { createUser, getUserByEmail } from '@/lib/user';
+import { createAuthSession, destroySession } from '@/lib/auth/auth';
+import { hashUserPassword, verifyPassword } from '@/lib/utils/hash';
+import { createUser, getUserByEmail } from '@/lib/repositories/user';
 import { redirect } from 'next/navigation';
 
 export interface Errors {
@@ -65,21 +65,27 @@ export async function login(prevState: unknown, formData: FormData) {
   const email = formData.get('email');
   const password = formData.get('password');
 
-  const existingUser = getUserByEmail(email);
-
-  if (!existingUser) {
-    return {
-      errors: {
-        email: 'Could not find user, please check credentials.',
-      },
-    };
+  if (process.env.AUTH_DEBUG === '1') {
+    console.log('[AUTH_DEBUG] intento de login', {
+      email,
+      password:
+        typeof password === 'string' ? password : String(password ?? ''),
+    });
   }
 
-  const isValidPassword = verifyPassword(existingUser.password, password);
+  const existingUser = getUserByEmail(email);
 
   const errors: Errors = {
     email: 'Could not find user, please check credentials.',
   };
+
+  if (!existingUser) {
+    return {
+      errors,
+    };
+  }
+
+  const isValidPassword = verifyPassword(existingUser.password, password);
 
   if (!isValidPassword) {
     return {
@@ -94,7 +100,7 @@ export async function login(prevState: unknown, formData: FormData) {
 export async function auth(
   mode: string,
   prevState: unknown,
-  formData: FormData
+  formData: FormData,
 ) {
   if (mode === 'login') {
     return login(prevState, formData);

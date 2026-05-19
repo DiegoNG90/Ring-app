@@ -1,0 +1,142 @@
+import { render, screen } from '@testing-library/react';
+import { redirect } from 'next/navigation';
+import { verifyAuth } from '@/lib/auth/auth';
+import { getAllTrainingsByUserId } from '@/lib/repositories/trainings';
+import type { Training } from '@/types/Trainings';
+import TrainingPage from './page';
+
+jest.mock('next/navigation', () => ({
+  redirect: jest.fn((url: string) => {
+    throw new Error(`NEXT_REDIRECT:${url}`);
+  }),
+}));
+
+jest.mock('@/lib/auth/auth', () => ({
+  verifyAuth: jest.fn(),
+}));
+
+jest.mock('@/lib/repositories/trainings', () => ({
+  getAllTrainingsByUserId: jest.fn(),
+}));
+
+jest.mock('../../../components/training/TrainingRoutinesList', () => {
+  return function MockTrainingRoutinesList({
+    trainings,
+  }: {
+    trainings: Training[];
+  }) {
+    if (trainings.length === 0) {
+      return <span>Todavia no hay rutinas, crea una!</span>;
+    }
+
+    return (
+      <div data-testid="training-routines-list">
+        <h2>Listado de rutinas</h2>
+        <ul>
+          {trainings.map((training) => (
+            <li key={training.training_id}>{training.training_title}</li>
+          ))}
+        </ul>
+      </div>
+    );
+  };
+});
+
+const mockTrainings: Training[] = [
+  {
+    training_id: 1,
+    training_title: 'Light Spar',
+    training_description: 'Sparring liviano',
+    round_id: 10,
+    round_number: 3,
+    duration_seconds: 180,
+    rest_seconds: 60,
+    repetitions: 0,
+  },
+  {
+    training_id: 2,
+    training_title: 'Heavy Bag',
+    training_description: 'Sacos pesados',
+    round_id: 20,
+    round_number: 5,
+    duration_seconds: 120,
+    rest_seconds: 30,
+    repetitions: 0,
+  },
+];
+
+async function renderTrainingPage() {
+  const ui = await TrainingPage();
+  return render(ui);
+}
+
+describe('TrainingPage', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('redirige al inicio si el usuario no está autenticado', async () => {
+    (verifyAuth as jest.Mock).mockResolvedValue({ user: null, session: null });
+
+    await expect(TrainingPage()).rejects.toThrow('NEXT_REDIRECT:/');
+    expect(redirect).toHaveBeenCalledWith('/');
+    expect(getAllTrainingsByUserId).not.toHaveBeenCalled();
+  });
+
+  it('obtiene las rutinas del usuario autenticado', async () => {
+    (verifyAuth as jest.Mock).mockResolvedValue({
+      user: { id: '42' },
+      session: { id: 'session-1' },
+    });
+    (getAllTrainingsByUserId as jest.Mock).mockReturnValue(mockTrainings);
+
+    await renderTrainingPage();
+
+    expect(getAllTrainingsByUserId).toHaveBeenCalledWith(42);
+  });
+
+  it('renderiza el encabezado y el botón Nueva rutina deshabilitado', async () => {
+    (verifyAuth as jest.Mock).mockResolvedValue({
+      user: { id: '1' },
+      session: { id: 'session-1' },
+    });
+    (getAllTrainingsByUserId as jest.Mock).mockReturnValue(mockTrainings);
+
+    await renderTrainingPage();
+
+    expect(
+      screen.getByRole('heading', { name: /training page/i }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /nueva rutina/i })).toBeDisabled();
+  });
+
+  it('muestra el listado de rutinas cuando hay entrenamientos', async () => {
+    (verifyAuth as jest.Mock).mockResolvedValue({
+      user: { id: '1' },
+      session: { id: 'session-1' },
+    });
+    (getAllTrainingsByUserId as jest.Mock).mockReturnValue(mockTrainings);
+
+    await renderTrainingPage();
+
+    expect(screen.getByTestId('training-routines-list')).toBeInTheDocument();
+    expect(screen.getByText('Listado de rutinas')).toBeInTheDocument();
+    expect(screen.getByText('Light Spar')).toBeInTheDocument();
+    expect(screen.getByText('Heavy Bag')).toBeInTheDocument();
+  });
+
+  it('muestra mensaje vacío cuando no hay rutinas', async () => {
+    (verifyAuth as jest.Mock).mockResolvedValue({
+      user: { id: '1' },
+      session: { id: 'session-1' },
+    });
+    (getAllTrainingsByUserId as jest.Mock).mockReturnValue([]);
+
+    await renderTrainingPage();
+
+    expect(
+      screen.getByText(/todavia no hay rutinas, crea una!/i),
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId('training-routines-list')).not.toBeInTheDocument();
+  });
+});

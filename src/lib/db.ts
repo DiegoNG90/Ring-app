@@ -2,11 +2,25 @@ import sql from 'better-sqlite3';
 
 const db = sql('training.db');
 
+// db.prepare(
+//   `
+//   DROP TABLE IF EXISTS training_rounds;
+//   `
+// ).run();
+
+// db.prepare(
+//   `
+//   DROP TABLE IF EXISTS trainings;
+//   `
+// ).run();
+
 db.exec(`
   CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY,
     email TEXT UNIQUE,
-    password TEXT
+    password TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   );
 `);
 
@@ -23,6 +37,10 @@ db.exec(`
     user_id INTEGER,
     title TEXT,
     description TEXT,
+    times_completed INTEGER DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_completed_at TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id)
   );
 `);
@@ -55,5 +73,33 @@ db.exec(`
 //     ('Sailing', '/sailing.jpg', 'A relaxing way to enjoy the outdoors and improve balance.');
 // `);
 // }
+
+// console.log('Ejecuta DB???');
+
+// db.prepare(
+//   `INSERT INTO trainings (user_id, title, description)
+// VALUES (?, ?, ?);`
+// ).run(1, 'Light spar', 'Rutina de sparring corta');
+
+// db.prepare(
+//   `INSERT INTO trainings (user_id, title, description)
+// VALUES (?, ?, ?);`
+// ).run(1, 'Medium spar', 'Rutina de sparring mediana (6 rounds)');
+
+// db.prepare(
+//   `
+//   INSERT INTO training_rounds (training_id, round_number, duration_seconds, rest_seconds, repetitions)
+//   VALUES(?, ?, ?, ?, ?);
+//   `
+// ).run(1, 2, 120, 30, 0);
+
+// db.prepare(
+//   `
+//   INSERT INTO training_rounds (training_id, round_number, duration_seconds, rest_seconds, repetitions)
+//   VALUES(?, ?, ?, ?, ?);
+//   `
+// ).run(2, 6, 120, 30, 0);
+
+// console.log('TERMINA DB???');
 
 export default db;
