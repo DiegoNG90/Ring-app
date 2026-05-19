@@ -1,3 +1,10 @@
+## Tablero (mini waterfall)
+
+https://trello.com/c/JO76afL8/8-mejorar-header
+
+En este tablero estoy documentando los tickets y tareas que fui tomando.
+De alguna forma, esto acompaña el proceso de pensamiento y análisis de la aplicacion a medida que la voy implementando.
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
