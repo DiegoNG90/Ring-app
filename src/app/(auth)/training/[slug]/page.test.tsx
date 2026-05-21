@@ -7,7 +7,7 @@ jest.mock('@/lib/repositories/trainings', () => ({
   getTrainingById: jest.fn(),
 }));
 
-jest.mock('@/components/training/RoutineCard', () => {
+jest.mock('@/components/training/Cards/RoutineCard', () => {
   return function MockRoutineCard({ training }: { training: Training }) {
     return (
       <div data-testid="routine-card">
