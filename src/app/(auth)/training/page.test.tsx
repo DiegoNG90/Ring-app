@@ -19,7 +19,7 @@ jest.mock('@/lib/repositories/trainings', () => ({
   getAllTrainingsByUserId: jest.fn(),
 }));
 
-jest.mock('../../../components/training/TrainingRoutinesList', () => {
+jest.mock('@/components/training/TrainingRoutinesList', () => {
   return function MockTrainingRoutinesList({
     trainings,
   }: {
