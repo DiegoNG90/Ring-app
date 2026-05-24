@@ -8,6 +8,10 @@ const projectRoot = path.join(__dirname, '..');
 const schemaPath = path.join(projectRoot, 'src', 'mocks', 'DB_SCHEMA.sqlite.sql');
 
 export function getDbPath() {
+  if (process.env.DB_PATH) {
+    return process.env.DB_PATH;
+  }
+
   return path.join(projectRoot, 'training.db');
 }
 

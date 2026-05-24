@@ -10,6 +10,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "db:init": "node scripts/init-db.mjs",
+    "db:seed-users": "node scripts/seed-users.mjs",
     "db:seed-trainings": "node scripts/run-sql-file.mjs src/mocks/DB_SEED_trainings.sqlite.sql"
   },
   "dependencies": {
@@ -23,7 +24,7 @@
     "geist": "^1.7.0",
     "lucia": "^3.2.2",
     "lucide-react": "^0.525.0",
-    "next": "15.3.5",
+    "next": "15.5.18",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "shadcn": "^2.9.0",
@@ -41,7 +42,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "15.3.5",
+    "eslint-config-next": "15.5.18",
     "jest": "^30.4.2",
     "jest-environment-jsdom": "^30.4.1",
     "tailwindcss": "^4",

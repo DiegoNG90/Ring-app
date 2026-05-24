@@ -1,6 +1,7 @@
 import sql from 'better-sqlite3';
 
-const db = sql('training.db');
+const dbPath = process.env.DB_PATH ?? 'training.db';
+const db = sql(dbPath);
 
 // db.prepare(
 //   `
