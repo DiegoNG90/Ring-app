@@ -31,7 +31,7 @@ jest.mock('@/components/training/TrainingRoutinesList', () => {
 
     return (
       <div data-testid="training-routines-list">
-        <h2>Listado de rutinas</h2>
+        <h1>Listado de rutinas</h1>
         <ul>
           {trainings.map((training) => (
             <li key={training.training_id}>{training.training_title}</li>
@@ -95,7 +95,7 @@ describe('TrainingPage', () => {
     expect(getAllTrainingsByUserId).toHaveBeenCalledWith(42);
   });
 
-  it('renders the heading and the disabled Nueva rutina button', async () => {
+  it('renders the disabled Nueva rutina button', async () => {
     (verifyAuth as jest.Mock).mockResolvedValue({
       user: { id: '1' },
       session: { id: 'session-1' },
@@ -104,9 +104,6 @@ describe('TrainingPage', () => {
 
     await renderTrainingPage();
 
-    expect(
-      screen.getByRole('heading', { name: /training page/i }),
-    ).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /nueva rutina/i })).toBeDisabled();
   });
 

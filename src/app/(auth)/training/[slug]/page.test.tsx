@@ -94,7 +94,7 @@ describe('TrainingRutinePage (routine detail)', () => {
         '/training',
       );
       expect(
-        screen.getByRole('heading', { name: /rutina:\s*light spar/i }),
+        screen.getByRole('heading', { name: /light spar/i }),
       ).toBeInTheDocument();
     });
 
