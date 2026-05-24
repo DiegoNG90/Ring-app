@@ -1,43 +1,31 @@
-import React from 'react';
-import Link from 'next/link';
-import InfoCard from '@/components/training/Cards/InfoCard';
+import TrainingRoutinesEmptyState from './components/TrainingRoutinesEmptyState/TrainingRoutinesEmptyState';
+import TrainingRoutinesListHeader from './components/TrainingRoutinesListHeader/TrainingRoutinesListHeader';
+import TrainingRoutinesListItem from './components/TrainingRoutinesListItem/TrainingRoutinesListItem';
+import type { TrainingRoutinesListProps } from './interfaces';
 
-import { Training } from '../../../types/Trainings';
-import { replaceBlankSpaceForHypen } from '@/lib/utils/strings';
+export default function TrainingRoutinesList({
+  trainings,
+}: TrainingRoutinesListProps) {
+  const hasTrainings = trainings.length > 0;
 
-interface TrainingRoutinesListProps {
-  trainings: Training[];
-}
-
-function TrainingRoutinesList({ trainings }: TrainingRoutinesListProps) {
-  console.log('trainings routine list:>', trainings);
   return (
     <>
-      {trainings?.length > 0 ? (
-        <h2 className="text-2xl font-bold text-left text-white mb-4 ml-4 mt-6">
-          Listado de rutinas
-        </h2>
+      {hasTrainings ? (
+        <TrainingRoutinesListHeader />
       ) : (
-        <span>Todavia no hay rutinas, crea una!</span>
+        <TrainingRoutinesEmptyState />
       )}
+
       <ul>
-        {trainings?.map((training: Training) => {
-          return (
-            <li
-              className="flex justify-center items-center mb-3"
-              key={training.training_id}
-            >
-              <InfoCard
-                result={training}
-                lastUsed="2024-01-15"
-                timesUsed={12}
-              />
-            </li>
-          );
-        })}
+        {trainings.map((training) => (
+          <TrainingRoutinesListItem
+            key={training.training_id}
+            training={training}
+          />
+        ))}
       </ul>
     </>
   );
 }
 
-export default TrainingRoutinesList;
+export type { TrainingRoutinesListProps } from './interfaces';

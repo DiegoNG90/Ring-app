@@ -145,7 +145,7 @@ ul {
   justify-content: space-between;
   align-items: center;
   max-width: 100%;
-  padding: 2rem 2rem;
+  padding: 12px 24px;
 }
 
 #auth-header p {

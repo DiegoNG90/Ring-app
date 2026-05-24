@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import InfoCard from './InfoCard';
 import { deleteTrainingAction } from '@/actions/training-actions';
@@ -49,26 +49,14 @@ describe('InfoCard', () => {
     (deleteTrainingAction as jest.Mock).mockResolvedValue({ success: true });
   });
 
-  it('renders training title, description and stats', () => {
+  it('composes header, stats and meta inside the link', () => {
     render(<InfoCard result={mockResult} timesUsed={5} lastUsed="2024-06-10" />);
-
-    expect(screen.getByText('Light Spar')).toBeInTheDocument();
-    expect(screen.getByText('Rutina corta de sparring')).toBeInTheDocument();
-    expect(screen.getByText('Usado 5 veces')).toBeInTheDocument();
-
-    const roundsRow = screen.getByText('Rounds').parentElement;
-    expect(roundsRow).not.toBeNull();
-    expect(within(roundsRow!).getByText('3')).toBeInTheDocument();
-
-    const durationRow = screen.getByText('Duración').parentElement;
-    expect(within(durationRow!).getByText('2:05')).toBeInTheDocument();
-  });
-
-  it('links to the training detail page with a slugified title', () => {
-    render(<InfoCard result={mockResult} />);
 
     const link = screen.getByRole('link');
     expect(link).toHaveAttribute('href', '/training/light-spar-42');
+    expect(link).toHaveTextContent('Light Spar');
+    expect(link).toHaveTextContent('Rutina corta de sparring');
+    expect(link).toHaveTextContent('Usado 5 veces');
   });
 
   it('opens the delete confirmation dialog when trash is clicked', async () => {

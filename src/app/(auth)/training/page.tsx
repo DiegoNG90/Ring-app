@@ -2,11 +2,10 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { verifyAuth } from '@/lib/auth/auth';
 import { redirect } from 'next/navigation';
-import CountdownTimer from '@/components/training/CountdownTimer';
 import { getAllTrainingsByUserId } from '@/lib/repositories/trainings';
 
 import { Training } from '@/types/Trainings';
-import TrainingRoutinesList from '../../../components/training/TrainingRoutinesList';
+import TrainingRoutinesList from '@/components/training/TrainingRoutinesList';
 
 export default async function TrainingPage() {
   const result = await verifyAuth();
@@ -29,13 +28,6 @@ export default async function TrainingPage() {
           Nueva rutina
         </Button>
       </div>
-
-      <h1>Training Page</h1>
-
-      {/* Esto deberia volar luego y reacomodarlo en otro lado */}
-      {/* <div className='flex justify-center items-center py-3'>
-        <CountdownTimer initialMinutes={0} initialSeconds={4} />
-      </div> */}
 
       <TrainingRoutinesList trainings={trainings} />
     </section>

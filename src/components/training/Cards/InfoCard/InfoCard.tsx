@@ -1,48 +1,32 @@
 'use client';
 
-import { useState, useTransition, type JSX, type MouseEvent } from 'react';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { useState, useTransition, type MouseEvent } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
-import { RotateCcw, Calendar, Zap, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { replaceBlankSpaceForHypen } from '@/lib/utils/strings';
 import { deleteTrainingAction } from '@/actions/training-actions';
+import InfoCardDeleteButton from './components/InfoCardDeleteButton/InfoCardDeleteButton';
+import InfoCardHeader from './components/InfoCardHeader/InfoCardHeader';
+import InfoCardStats from './components/InfoCardStats/InfoCardStats';
+import InfoCardUsageMeta from './components/InfoCardUsageMeta/InfoCardUsageMeta';
+import { getTrainingHref } from './helpers';
+import type { InfoCardProps } from './interfaces';
 
-interface InfoCardProps {
-  result: {
-    training_id: number;
-    training_title: string;
-    training_description: string;
-    round_id: number;
-    round_number: number;
-    duration_seconds: number;
-    rest_seconds: number;
-    repetitions: number;
-  };
-  lastUsed?: string;
-  timesUsed?: number;
-}
-
-function InfoCard({
+export default function InfoCard({
   result,
   lastUsed = '2024-01-15',
   timesUsed = 12,
-}: InfoCardProps): JSX.Element {
+}: InfoCardProps) {
   const router = useRouter();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  const parsedTrainingTitle = replaceBlankSpaceForHypen(result.training_title);
-  const trainingHref = `/training/${parsedTrainingTitle}-${result.training_id}`;
+  const trainingHref = getTrainingHref(
+    result.training_id,
+    result.training_title,
+  );
 
   const handleDeleteClick = (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
@@ -68,62 +52,23 @@ function InfoCard({
   return (
     <>
       <Card className="relative w-full min-w-[360px] max-w-sm mx-auto border-l-4 border-l-blue-500 bg-zinc-950/80 hover:shadow-md transition-shadow duration-200">
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          aria-label={`Eliminar rutina ${result.training_title}`}
-          className="absolute top-2 right-2 z-10 size-8 text-zinc-400 hover:text-red-400 hover:bg-red-950/40"
+        <InfoCardDeleteButton
+          trainingTitle={result.training_title}
           onClick={handleDeleteClick}
-        >
-          <Trash2 className="size-4" />
-        </Button>
+        />
 
         <Link href={trainingHref} className="block cursor-pointer">
-          <CardHeader className="pb-3 pr-12">
-            <div className="flex justify-between items-start gap-2">
-              <div className="flex-1 min-w-0">
-                <CardTitle className="text-lg font-bold line-clamp-1 text-white">
-                  {result.training_title}
-                </CardTitle>
-                <CardDescription className="text-sm text-gray-200 mt-1 line-clamp-2">
-                  {result.training_description}
-                </CardDescription>
-              </div>
-              <Zap className="h-5 w-5 shrink-0 text-blue-500" aria-hidden />
-            </div>
-          </CardHeader>
+          <InfoCardHeader
+            title={result.training_title}
+            description={result.training_description}
+          />
 
           <CardContent className="pt-0">
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-zinc-400">Rounds</span>
-                <span className="font-medium text-zinc-100">
-                  {result.round_number}
-                </span>
-              </div>
-
-              <div className="flex justify-between text-sm">
-                <span className="text-zinc-400">Duración</span>
-                <span className="font-medium text-zinc-100">
-                  {Math.floor(result.duration_seconds / 60)}:
-                  {(result.duration_seconds % 60).toString().padStart(2, '0')}
-                </span>
-              </div>
-
-              <div className="pt-2 border-t border-zinc-700/60">
-                <div className="flex justify-between items-center text-xs text-zinc-400">
-                  <div className="flex items-center gap-1">
-                    <RotateCcw className="h-3 w-3" aria-hidden />
-                    <span>Usado {timesUsed} veces</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Calendar className="h-3 w-3" aria-hidden />
-                    <span>{new Date(lastUsed).toLocaleDateString()}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <InfoCardStats
+              roundNumber={result.round_number}
+              durationSeconds={result.duration_seconds}
+            />
+            <InfoCardUsageMeta timesUsed={timesUsed} lastUsed={lastUsed} />
           </CardContent>
         </Link>
       </Card>
@@ -146,4 +91,4 @@ function InfoCard({
   );
 }
 
-export default InfoCard;
+export type { InfoCardProps } from './interfaces';

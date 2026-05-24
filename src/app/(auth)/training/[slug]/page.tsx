@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 
-import RoutineCard from '@/components/training/RoutineCard';
+import RoutineCard from '@/components/training/Cards/RoutineCard';
 import { getTrainingById } from '@/lib/repositories/trainings';
 import { capitalize, normalizeUrlSlug } from '@/lib/utils/strings';
 
@@ -48,18 +48,15 @@ async function TrainingRutinePage({ params }: TrainingRutinePageProps) {
 
   return (
     <div className="p-4 max-w-lg mx-auto">
-      <div className="mb-6 flex justify-between items-center gap-4">
+      <div className="mb-6 flex items-center">
         <Link
           href="/training"
           className="text-white hover:text-zinc-200 text-sm font-medium shrink-0 underline-offset-2 hover:underline"
         >
           ← Volver
         </Link>
-        <h1 className="text-lg sm:text-xl font-semibold text-right text-zinc-100">
-          <span className="text-zinc-400">Rutina: </span>
-          <span className="text-red-400">
-            {training.training_title || title}
-          </span>
+        <h1 className="text-lg w-full text-center sm:text-xl font-semibold text-right text-red-400">
+          {training.training_title || title}
         </h1>
       </div>
 
