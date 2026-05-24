@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import TrainingRoutinesListHeader from './TrainingRoutinesListHeader';
 
 describe('TrainingRoutinesListHeader', () => {
-  it('renderiza el título por defecto', () => {
+  it('renders the default title', () => {
     render(<TrainingRoutinesListHeader />);
 
     expect(
@@ -10,7 +10,7 @@ describe('TrainingRoutinesListHeader', () => {
     ).toBeInTheDocument();
   });
 
-  it('permite personalizar el título', () => {
+  it('allows customizing the title', () => {
     render(<TrainingRoutinesListHeader title="Mis rutinas" />);
 
     expect(

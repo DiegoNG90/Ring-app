@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import InfoCardDeleteButton from './InfoCardDeleteButton';
 
 describe('InfoCardDeleteButton', () => {
-  it('renderiza botón accesible para eliminar', () => {
+  it('renders an accessible delete button', () => {
     render(
       <InfoCardDeleteButton trainingTitle="Light Spar" onClick={jest.fn()} />,
     );
@@ -13,7 +13,7 @@ describe('InfoCardDeleteButton', () => {
     ).toBeInTheDocument();
   });
 
-  it('dispara onClick al pulsar', async () => {
+  it('fires onClick when clicked', async () => {
     const onClick = jest.fn();
     const user = userEvent.setup();
 

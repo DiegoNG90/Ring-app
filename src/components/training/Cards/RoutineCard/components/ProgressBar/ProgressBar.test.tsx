@@ -8,7 +8,7 @@ describe('ProgressBar', () => {
     { type: 'round' as const, round: 2 },
   ];
 
-  it('marca el paso activo en la barra', () => {
+  it('marks the active step in the bar', () => {
     render(<ProgressBar sequence={sequence} currentCard={0} />);
 
     const progressList = screen.getByRole('list', {
@@ -21,7 +21,7 @@ describe('ProgressBar', () => {
     expect(steps[1]).not.toHaveAttribute('aria-current');
   });
 
-  it('actualiza el paso activo cuando cambia currentCard', () => {
+  it('updates the active step when currentCard changes', () => {
     render(<ProgressBar sequence={sequence} currentCard={1} />);
 
     const progressList = screen.getByRole('list', {
@@ -33,7 +33,7 @@ describe('ProgressBar', () => {
     expect(steps[0]).not.toHaveAttribute('aria-current');
   });
 
-  it('expone títulos accesibles en los pasos round y descanso', () => {
+  it('exposes accessible titles on round and rest steps', () => {
     render(<ProgressBar sequence={sequence} currentCard={0} />);
 
     const progressList = screen.getByRole('list', {

@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import SegmentControls from './SegmentControls';
 
 describe('SegmentControls', () => {
-  it('muestra Empezar antes de iniciar el primer paso', () => {
+  it('shows Start before the first step begins', () => {
     render(
       <SegmentControls
         type="round"
@@ -19,7 +19,7 @@ describe('SegmentControls', () => {
     expect(screen.getByRole('button', { name: /empezar/i })).toBeInTheDocument();
   });
 
-  it('muestra Pausar cuando el timer está corriendo', () => {
+  it('shows Pause when the timer is running', () => {
     render(
       <SegmentControls
         type="round"
@@ -35,7 +35,7 @@ describe('SegmentControls', () => {
     expect(screen.getByRole('button', { name: /pausar/i })).toBeInTheDocument();
   });
 
-  it('muestra Reanudar cuando el timer está pausado', () => {
+  it('shows Resume when the timer is paused', () => {
     render(
       <SegmentControls
         type="rest"
@@ -51,7 +51,7 @@ describe('SegmentControls', () => {
     expect(screen.getByRole('button', { name: /reanudar/i })).toBeInTheDocument();
   });
 
-  it('dispara callbacks de toggle y reset', async () => {
+  it('fires toggle and reset callbacks', async () => {
     const onToggle = jest.fn();
     const onReset = jest.fn();
     const user = userEvent.setup();

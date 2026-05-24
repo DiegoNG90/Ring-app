@@ -36,13 +36,13 @@ async function renderTrainingDetailPage(slug: string) {
   return render(ui);
 }
 
-describe('TrainingRutinePage (detalle de rutina)', () => {
+describe('TrainingRutinePage (routine detail)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  describe('slug inválido', () => {
-    it('muestra error cuando el id del slug no es numérico', async () => {
+  describe('invalid slug', () => {
+    it('shows error when the slug id is not numeric', async () => {
       await renderTrainingDetailPage('solo-texto');
 
       expect(screen.getByText(/rutina no válida/i)).toBeInTheDocument();
@@ -52,7 +52,7 @@ describe('TrainingRutinePage (detalle de rutina)', () => {
       expect(getTrainingById).not.toHaveBeenCalled();
     });
 
-    it('muestra error cuando el id es menor a 1', async () => {
+    it('shows error when the id is less than 1', async () => {
       await renderTrainingDetailPage('light-spar-0');
 
       expect(screen.getByText(/rutina no válida/i)).toBeInTheDocument();
@@ -60,8 +60,8 @@ describe('TrainingRutinePage (detalle de rutina)', () => {
     });
   });
 
-  describe('rutina no encontrada', () => {
-    it('muestra mensaje y enlace al listado', async () => {
+  describe('routine not found', () => {
+    it('shows message and link back to the list', async () => {
       (getTrainingById as jest.Mock).mockReturnValue(undefined);
 
       await renderTrainingDetailPage('light-spar-99');
@@ -75,18 +75,18 @@ describe('TrainingRutinePage (detalle de rutina)', () => {
     });
   });
 
-  describe('detalle válido', () => {
+  describe('valid detail', () => {
     beforeEach(() => {
       (getTrainingById as jest.Mock).mockReturnValue(mockTraining);
     });
 
-    it('obtiene la rutina por id extraído del slug', async () => {
+    it('fetches the routine by id extracted from the slug', async () => {
       await renderTrainingDetailPage('light-spar-42');
 
       expect(getTrainingById).toHaveBeenCalledWith(42);
     });
 
-    it('renderiza navegación y título de la rutina', async () => {
+    it('renders navigation and routine title', async () => {
       await renderTrainingDetailPage('light-spar-42');
 
       expect(screen.getByRole('link', { name: /volver/i })).toHaveAttribute(
@@ -98,7 +98,7 @@ describe('TrainingRutinePage (detalle de rutina)', () => {
       ).toBeInTheDocument();
     });
 
-    it('renderiza RoutineCard con los datos del entrenamiento', async () => {
+    it('renders RoutineCard with training data', async () => {
       await renderTrainingDetailPage('light-spar-42');
 
       expect(screen.getByTestId('routine-card')).toBeInTheDocument();
@@ -108,7 +108,7 @@ describe('TrainingRutinePage (detalle de rutina)', () => {
       expect(screen.getByTestId('routine-card-rounds')).toHaveTextContent('3');
     });
 
-    it('contiene el contenedor del cronómetro de rutina', async () => {
+    it('contains the routine timer container', async () => {
       await renderTrainingDetailPage('light-spar-42');
 
       expect(document.getElementById('training-routine-card')).toBeInTheDocument();

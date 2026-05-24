@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import SegmentStats from './SegmentStats';
 
 describe('SegmentStats', () => {
-  it('muestra duración del round y descanso próximo', () => {
+  it('shows round duration and upcoming rest', () => {
     render(
       <SegmentStats type="round" durationSeconds={180} restSeconds={60} />,
     );
@@ -13,7 +13,7 @@ describe('SegmentStats', () => {
     expect(screen.getByText('1:00')).toBeInTheDocument();
   });
 
-  it('muestra guión cuando no hay descanso configurado en round', () => {
+  it('shows dash when no rest is configured for the round', () => {
     render(
       <SegmentStats type="round" durationSeconds={60} restSeconds={0} />,
     );
@@ -22,7 +22,7 @@ describe('SegmentStats', () => {
     expect(screen.getByText('—')).toBeInTheDocument();
   });
 
-  it('muestra stats de descanso y siguiente round', () => {
+  it('shows rest stats and next round', () => {
     render(
       <SegmentStats type="rest" durationSeconds={180} restSeconds={45} />,
     );

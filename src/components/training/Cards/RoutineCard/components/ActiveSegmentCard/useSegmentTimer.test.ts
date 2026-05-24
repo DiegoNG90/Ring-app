@@ -20,7 +20,7 @@ describe('useSegmentTimer', () => {
     jest.useRealTimers();
   });
 
-  it('inicializa con el tiempo total', () => {
+  it('initializes with the total time', () => {
     const { result } = renderHook(() =>
       useSegmentTimer({
         totalTime: 30,
@@ -37,7 +37,7 @@ describe('useSegmentTimer', () => {
     expect(result.current.progress).toBe(0);
   });
 
-  it('cuenta regresivamente cuando está corriendo', async () => {
+  it('counts down when running', async () => {
     const { result } = renderHook(() =>
       useSegmentTimer({
         totalTime: 5,
@@ -55,7 +55,7 @@ describe('useSegmentTimer', () => {
     expect(result.current.progress).toBe(40);
   });
 
-  it('pausa el conteo al pausar', async () => {
+  it('pauses the count when toggled', async () => {
     const onPause = jest.fn();
     const { result } = renderHook(() =>
       useSegmentTimer({
@@ -82,7 +82,7 @@ describe('useSegmentTimer', () => {
     expect(result.current.timeLeft).toBe(timeBeforePause);
   });
 
-  it('reanuda el conteo tras pausar', async () => {
+  it('resumes the count after pausing', async () => {
     const { result } = renderHook(() =>
       useSegmentTimer({
         totalTime: 5,

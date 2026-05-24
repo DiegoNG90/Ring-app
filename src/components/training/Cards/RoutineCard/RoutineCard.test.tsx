@@ -66,8 +66,8 @@ describe('RoutineCard', () => {
     jest.useRealTimers();
   });
 
-  describe('estados inválidos o vacíos', () => {
-    it('muestra mensaje cuando no hay rounds configurados', () => {
+  describe('invalid or empty states', () => {
+    it('shows message when no rounds are configured', () => {
       render(<RoutineCard training={createTraining({ round_number: 0 })} />);
 
       expect(
@@ -76,8 +76,8 @@ describe('RoutineCard', () => {
     });
   });
 
-  describe('render inicial', () => {
-    it('muestra progreso, round activo y barra de pasos', () => {
+  describe('initial render', () => {
+    it('shows progress, active round and step bar', () => {
       render(<RoutineCard training={createTraining()} />);
 
       expect(screen.getByText(/Paso 1 de 3/)).toBeInTheDocument();
@@ -91,7 +91,7 @@ describe('RoutineCard', () => {
     });
   });
 
-  describe('controles del timer', () => {
+  describe('timer controls', () => {
     it('reproduce la campana al empezar', async () => {
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       render(
@@ -137,7 +137,7 @@ describe('RoutineCard', () => {
       ).toBeInTheDocument();
     });
 
-    it('vuelve al primer round al resetear durante el descanso', async () => {
+    it('goes back to the first round when resetting during rest', async () => {
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       render(
         <RoutineCard
@@ -166,7 +166,7 @@ describe('RoutineCard', () => {
       expect(getMainTimerInSegment('round')).toHaveTextContent('0:02');
     });
 
-    it('vuelve al primer round al resetear en el segundo round', async () => {
+    it('goes back to the first round when resetting on the second round', async () => {
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       render(
         <RoutineCard
@@ -203,7 +203,7 @@ describe('RoutineCard', () => {
       ).toBeInTheDocument();
     });
 
-    it('vuelve a mostrar Empezar y permite campana tras reset en el primer paso', async () => {
+    it('shows Start again and allows the bell after reset on the first step', async () => {
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       render(
         <RoutineCard
@@ -260,7 +260,7 @@ describe('RoutineCard', () => {
     });
   });
 
-  describe('avance de segmentos y sonidos', () => {
+  describe('segment advance and sounds', () => {
     it('reproduce maderas a los 10 segundos restantes en un round', async () => {
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       render(

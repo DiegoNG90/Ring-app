@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import SegmentHeader from './SegmentHeader';
 
 describe('SegmentHeader', () => {
-  it('renderiza título y nombre de la rutina en un round', () => {
+  it('renders title and routine name in a round', () => {
     render(
       <SegmentHeader
         type="round"
@@ -18,7 +18,7 @@ describe('SegmentHeader', () => {
     expect(screen.queryByText('Descanso')).not.toBeInTheDocument();
   });
 
-  it('renderiza badge, icono y siguiente round en descanso', () => {
+  it('renders badge, icon and next round in rest', () => {
     render(
       <SegmentHeader
         type="rest"

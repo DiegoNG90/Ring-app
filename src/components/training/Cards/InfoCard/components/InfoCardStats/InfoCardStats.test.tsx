@@ -2,7 +2,7 @@ import { render, screen, within } from '@testing-library/react';
 import InfoCardStats from './InfoCardStats';
 
 describe('InfoCardStats', () => {
-  it('muestra rounds y duración formateada', () => {
+  it('shows rounds and formatted duration', () => {
     render(<InfoCardStats roundNumber={3} durationSeconds={125} />);
 
     const roundsRow = screen.getByText('Rounds').parentElement;

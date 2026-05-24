@@ -8,21 +8,21 @@ describe('RoutineProgress', () => {
     { type: 'round' as const, round: 2 },
   ];
 
-  it('muestra paso actual y label del segmento activo', () => {
+  it('shows current step and active segment label', () => {
     render(<RoutineProgress sequence={sequence} currentCard={0} />);
 
     expect(screen.getByText(/Paso 1 de 3/)).toBeInTheDocument();
     expect(screen.getByText('Round 1')).toBeInTheDocument();
   });
 
-  it('muestra label de descanso cuando el paso activo es rest', () => {
+  it('shows rest label when the active step is rest', () => {
     render(<RoutineProgress sequence={sequence} currentCard={1} />);
 
     expect(screen.getByText(/Paso 2 de 3/)).toBeInTheDocument();
     expect(screen.getByText('Descanso')).toBeInTheDocument();
   });
 
-  it('muestra label del segundo round en el paso final', () => {
+  it('shows second round label on the final step', () => {
     render(<RoutineProgress sequence={sequence} currentCard={2} />);
 
     expect(screen.getByText(/Paso 3 de 3/)).toBeInTheDocument();

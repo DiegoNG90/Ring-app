@@ -75,7 +75,7 @@ describe('TrainingPage', () => {
     jest.clearAllMocks();
   });
 
-  it('redirige al inicio si el usuario no está autenticado', async () => {
+  it('redirects to home if the user is not authenticated', async () => {
     (verifyAuth as jest.Mock).mockResolvedValue({ user: null, session: null });
 
     await expect(TrainingPage()).rejects.toThrow('NEXT_REDIRECT:/');
@@ -83,7 +83,7 @@ describe('TrainingPage', () => {
     expect(getAllTrainingsByUserId).not.toHaveBeenCalled();
   });
 
-  it('obtiene las rutinas del usuario autenticado', async () => {
+  it('fetches routines for the authenticated user', async () => {
     (verifyAuth as jest.Mock).mockResolvedValue({
       user: { id: '42' },
       session: { id: 'session-1' },
@@ -95,7 +95,7 @@ describe('TrainingPage', () => {
     expect(getAllTrainingsByUserId).toHaveBeenCalledWith(42);
   });
 
-  it('renderiza el encabezado y el botón Nueva rutina deshabilitado', async () => {
+  it('renders the heading and the disabled Nueva rutina button', async () => {
     (verifyAuth as jest.Mock).mockResolvedValue({
       user: { id: '1' },
       session: { id: 'session-1' },
@@ -110,7 +110,7 @@ describe('TrainingPage', () => {
     expect(screen.getByRole('button', { name: /nueva rutina/i })).toBeDisabled();
   });
 
-  it('muestra el listado de rutinas cuando hay entrenamientos', async () => {
+  it('shows the training routines list when there are trainings', async () => {
     (verifyAuth as jest.Mock).mockResolvedValue({
       user: { id: '1' },
       session: { id: 'session-1' },
@@ -125,7 +125,7 @@ describe('TrainingPage', () => {
     expect(screen.getByText('Heavy Bag')).toBeInTheDocument();
   });
 
-  it('muestra mensaje vacío cuando no hay rutinas', async () => {
+  it('shows empty state message when there are no routines', async () => {
     (verifyAuth as jest.Mock).mockResolvedValue({
       user: { id: '1' },
       session: { id: 'session-1' },

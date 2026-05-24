@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import InfoCardHeader from './InfoCardHeader';
 
 describe('InfoCardHeader', () => {
-  it('renderiza título y descripción de la rutina', () => {
+  it('renders the routine title and description', () => {
     render(
       <InfoCardHeader
         title="Light Spar"

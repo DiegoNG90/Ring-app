@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import TrainingRoutinesEmptyState from './TrainingRoutinesEmptyState';
 
 describe('TrainingRoutinesEmptyState', () => {
-  it('renderiza el mensaje por defecto', () => {
+  it('renders the default message', () => {
     render(<TrainingRoutinesEmptyState />);
 
     expect(
@@ -10,7 +10,7 @@ describe('TrainingRoutinesEmptyState', () => {
     ).toBeInTheDocument();
   });
 
-  it('permite personalizar el mensaje', () => {
+  it('allows customizing the message', () => {
     render(<TrainingRoutinesEmptyState message="Sin rutinas todavía" />);
 
     expect(screen.getByText('Sin rutinas todavía')).toBeInTheDocument();

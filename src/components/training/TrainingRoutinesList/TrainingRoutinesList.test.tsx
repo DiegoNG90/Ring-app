@@ -32,7 +32,7 @@ const mockTrainings: Training[] = [
 ];
 
 describe('TrainingRoutinesList', () => {
-  it('muestra encabezado y cards cuando hay rutinas', () => {
+  it('shows heading and cards when there are routines', () => {
     render(<TrainingRoutinesList trainings={mockTrainings} />);
 
     expect(
@@ -43,7 +43,7 @@ describe('TrainingRoutinesList', () => {
     expect(screen.getByText('Heavy Bag')).toBeInTheDocument();
   });
 
-  it('muestra estado vacío cuando no hay rutinas', () => {
+  it('shows empty state when there are no routines', () => {
     render(<TrainingRoutinesList trainings={[]} />);
 
     expect(

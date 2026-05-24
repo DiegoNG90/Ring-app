@@ -34,7 +34,7 @@ const mockTraining: Training = {
 };
 
 describe('TrainingRoutinesListItem', () => {
-  it('renderiza un item de lista con InfoCard', () => {
+  it('renders a list item with InfoCard', () => {
     const { container } = render(
       <ul>
         <TrainingRoutinesListItem training={mockTraining} />
@@ -47,7 +47,7 @@ describe('TrainingRoutinesListItem', () => {
     expect(screen.getByText('Light Spar')).toBeInTheDocument();
   });
 
-  it('pasa lastUsed y timesUsed a InfoCard', () => {
+  it('passes lastUsed and timesUsed to InfoCard', () => {
     render(
       <TrainingRoutinesListItem
         training={mockTraining}

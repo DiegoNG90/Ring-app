@@ -49,7 +49,7 @@ describe('InfoCard', () => {
     (deleteTrainingAction as jest.Mock).mockResolvedValue({ success: true });
   });
 
-  it('compone header, stats y meta dentro del enlace', () => {
+  it('composes header, stats and meta inside the link', () => {
     render(<InfoCard result={mockResult} timesUsed={5} lastUsed="2024-06-10" />);
 
     const link = screen.getByRole('link');

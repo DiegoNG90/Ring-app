@@ -41,7 +41,7 @@ describe('ActiveSegmentCard', () => {
   });
 
   describe('render', () => {
-    it('muestra el tiempo inicial del round', () => {
+    it('shows the initial round time', () => {
       render(
         <ActiveSegmentCard
           training={{ ...training, duration_seconds: 125 }}
@@ -56,7 +56,7 @@ describe('ActiveSegmentCard', () => {
       expect(getMainTimerInSegment('round')).toHaveTextContent('2:05');
     });
 
-    it('muestra título de descanso en segmento rest', () => {
+    it('shows rest title in a rest segment', () => {
       render(
         <ActiveSegmentCard
           training={training}
@@ -73,7 +73,7 @@ describe('ActiveSegmentCard', () => {
       ).toBeInTheDocument();
     });
 
-    it('muestra error cuando la duración es cero', () => {
+    it('shows error when duration is zero', () => {
       render(
         <ActiveSegmentCard
           training={{ ...training, duration_seconds: 0 }}
@@ -88,7 +88,7 @@ describe('ActiveSegmentCard', () => {
       expect(screen.getByText(/duración no válida/i)).toBeInTheDocument();
     });
 
-    it('muestra error cuando el descanso es cero en segmento rest', () => {
+    it('shows error when rest duration is zero in a rest segment', () => {
       render(
         <ActiveSegmentCard
           training={{ ...training, rest_seconds: 0 }}
@@ -103,7 +103,7 @@ describe('ActiveSegmentCard', () => {
       expect(screen.getByText(/duración no válida.*descanso/i)).toBeInTheDocument();
     });
 
-    it('muestra stats de descanso próximo como guión cuando no hay descanso', () => {
+    it('shows upcoming rest stat as dash when there is no rest configured', () => {
       render(
         <ActiveSegmentCard
           training={{ ...training, rest_seconds: 0 }}
@@ -120,8 +120,8 @@ describe('ActiveSegmentCard', () => {
     });
   });
 
-  describe('controles del timer', () => {
-    it('muestra botón Empezar cuando no ha iniciado', () => {
+  describe('timer controls', () => {
+    it('shows the Start button when not yet started', () => {
       render(
         <ActiveSegmentCard
           training={training}
@@ -136,7 +136,7 @@ describe('ActiveSegmentCard', () => {
       expect(screen.getByRole('button', { name: /empezar/i })).toBeInTheDocument();
     });
 
-    it('llama onStart al empezar', async () => {
+    it('calls onStart when started', async () => {
       const onStart = jest.fn();
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
 
@@ -157,7 +157,7 @@ describe('ActiveSegmentCard', () => {
       expect(onStart).toHaveBeenCalled();
     });
 
-    it('llama onPause al pausar', async () => {
+    it('calls onPause when paused', async () => {
       const onPause = jest.fn();
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
 
@@ -179,7 +179,7 @@ describe('ActiveSegmentCard', () => {
       expect(screen.getByRole('button', { name: /reanudar/i })).toBeInTheDocument();
     });
 
-    it('resetea el timer local en el primer paso', async () => {
+    it('resets the local timer on the first step', async () => {
       const onReset = jest.fn();
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
 
@@ -203,8 +203,8 @@ describe('ActiveSegmentCard', () => {
     });
   });
 
-  describe('callbacks de timer', () => {
-    it('llama onPreFinish a los 10 segundos restantes en un round', async () => {
+  describe('timer callbacks', () => {
+    it('calls onPreFinish at 10 seconds remaining in a round', async () => {
       const onPreFinish = jest.fn();
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
 
@@ -226,7 +226,7 @@ describe('ActiveSegmentCard', () => {
       expect(onPreFinish).toHaveBeenCalled();
     });
 
-    it('no llama onPreFinish si el round dura 10 segundos o menos', async () => {
+    it('does not call onPreFinish if the round is 10 seconds or less', async () => {
       const onPreFinish = jest.fn();
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
 
@@ -248,7 +248,7 @@ describe('ActiveSegmentCard', () => {
       expect(onPreFinish).not.toHaveBeenCalled();
     });
 
-    it('llama onComplete al agotar el tiempo', async () => {
+    it('calls onComplete when time runs out', async () => {
       const onComplete = jest.fn();
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
 
