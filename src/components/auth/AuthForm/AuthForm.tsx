@@ -1,26 +1,17 @@
 'use client';
-import { auth } from '@/actions/auth-actions';
-import Link from 'next/link';
 
-import type { Errors } from '../../../actions/auth-actions';
+import { login } from '@/actions/auth-actions';
+import type { Errors } from '@/actions/auth-actions';
+import logo from '@/assets/login.svg';
+import Image from 'next/image';
 import { useActionState } from 'react';
-
-interface AuthFormInterface {
-  mode: string;
-}
 
 const initialState: { errors: Errors } = {
   errors: {},
 };
 
-import logo from '@/assets/login.svg';
-import Image from 'next/image';
-
-export default function AuthForm({ mode }: AuthFormInterface) {
-  const [formState, action] = useActionState(
-    auth.bind(null, mode),
-    initialState
-  );
+export default function AuthForm() {
+  const [formState, action] = useActionState(login, initialState);
 
   return (
     <form id="auth-form" action={action}>
@@ -28,17 +19,20 @@ export default function AuthForm({ mode }: AuthFormInterface) {
         <Image src={logo} alt="A lock icon" />
       </div>
       <p>
-        <label htmlFor="email">Email</label>
-        <input type="email" name="email" id="email" />
+        <label htmlFor="email">Usuario</label>
+        <input type="text" name="email" id="email" autoComplete="username" />
       </p>
       <p>
         <label htmlFor="password">Password</label>
-        <input type="password" name="password" id="password" />
+        <input
+          type="password"
+          name="password"
+          id="password"
+          autoComplete="current-password"
+        />
       </p>
       <p>
-        <button type="submit">
-          {mode === 'login' ? 'Login' : 'Create Account'}
-        </button>
+        <button type="submit">Login</button>
       </p>
       {formState.errors && (
         <ul id="form-errors">
@@ -47,14 +41,6 @@ export default function AuthForm({ mode }: AuthFormInterface) {
           ))}
         </ul>
       )}
-      <p>
-        {mode === 'login' && (
-          <Link href="/?mode=signup">Create an account</Link>
-        )}
-        {mode === 'signup' && (
-          <Link href="/?mode=login">Login with existing account.</Link>
-        )}
-      </p>
     </form>
   );
 }

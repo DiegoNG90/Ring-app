@@ -1,10 +1,12 @@
 /**
- * Solo desarrollo local: gestiona usuarios en training.db.
+ * Gestión de usuarios en training.db.
+ *
+ * La creación normal de usuarios está deprecada; usar scripts/seed-users.mjs.
  *
  * Actualizar contraseña:
  *   node scripts/reset-dev-password.mjs <email> <nueva-contraseña>
  *
- * Crear usuario:
+ * Crear usuario (solo emergencias admin):
  *   node scripts/reset-dev-password.mjs --create-user <email> <contraseña>
  */
 import crypto from 'node:crypto';

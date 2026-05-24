@@ -2,15 +2,7 @@ import AuthForm from '@/components/auth/AuthForm';
 import { verifyAuth } from '@/lib/auth/auth';
 import { redirect } from 'next/navigation';
 
-interface PageProps {
-  searchParams: {
-    [key: string]: string | undefined;
-  };
-}
-
-export default async function Home({ searchParams }: PageProps) {
-  const { mode } = await searchParams;
-
+export default async function Home() {
   const result = await verifyAuth();
 
   if (result.user && result.user.id) {
@@ -19,7 +11,7 @@ export default async function Home({ searchParams }: PageProps) {
 
   return (
     <main>
-      <AuthForm mode={mode || 'login'} />
+      <AuthForm />
     </main>
   );
 }
