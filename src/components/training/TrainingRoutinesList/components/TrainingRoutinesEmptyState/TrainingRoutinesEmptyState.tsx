@@ -5,5 +5,7 @@ interface TrainingRoutinesEmptyStateProps {
 export default function TrainingRoutinesEmptyState({
   message = 'Todavia no hay rutinas, crea una!',
 }: TrainingRoutinesEmptyStateProps) {
-  return <span>{message}</span>;
+  return (
+    <h2 className="w-full text-center text-white block text-xl">{message}</h2>
+  );
 }

@@ -29,8 +29,6 @@ export default async function TrainingPage() {
         </Button>
       </div>
 
-      <h1>Training Page</h1>
-
       <TrainingRoutinesList trainings={trainings} />
     </section>
   );
