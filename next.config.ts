@@ -1,5 +1,4 @@
 import type { NextConfig } from 'next';
-import path from 'node:path';
 
 const securityHeaders = [
   { key: 'X-Frame-Options', value: 'DENY' },
@@ -34,8 +33,6 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 const nextConfig: NextConfig = {
-  output: 'standalone',
-  outputFileTracingRoot: path.join(__dirname),
   serverExternalPackages: ['better-sqlite3'],
   async headers() {
     return [
