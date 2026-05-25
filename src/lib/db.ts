@@ -1,6 +1,22 @@
+import fs from 'node:fs';
 import sql from 'better-sqlite3';
 
-const dbPath = process.env.DB_PATH ?? 'training.db';
+function resolveDbPath(): string {
+  const fromEnv = process.env.DB_PATH;
+  const volumeMounted = fs.existsSync('/data');
+
+  if (fromEnv?.startsWith('/')) {
+    return fromEnv;
+  }
+
+  if (volumeMounted) {
+    return '/data/training.db';
+  }
+
+  return fromEnv ?? 'training.db';
+}
+
+const dbPath = resolveDbPath();
 const db = sql(dbPath);
 
 // db.prepare(
