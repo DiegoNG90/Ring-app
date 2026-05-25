@@ -9,7 +9,7 @@
 
 INSERT INTO trainings (user_id, title, description)
 VALUES (
-  (SELECT id FROM users WHERE email = 'diego@gmail.com'),
+  (SELECT id FROM users WHERE email = 'diego@test.com'),
   'Light spar',
   'Rutina de sparring corta'
 );
@@ -19,7 +19,7 @@ VALUES (last_insert_rowid(), 2, 120, 60, 0);
 
 INSERT INTO trainings (user_id, title, description)
 VALUES (
-  (SELECT id FROM users WHERE email = 'diego@gmail.com'),
+  (SELECT id FROM users WHERE email = 'diego@test.com'),
   'Medium spar',
   'Rutina de sparring mediana (6 rounds)'
 );
