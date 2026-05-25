@@ -12,8 +12,12 @@ export function getDbPath() {
   const fromEnv = process.env.DB_PATH;
   const volumeMounted = fs.existsSync('/data');
 
+  // Ruta absoluta solo si el directorio existe (en build /data aún no está montado)
   if (fromEnv?.startsWith('/')) {
-    return fromEnv;
+    const parentDir = path.dirname(fromEnv);
+    if (fs.existsSync(parentDir)) {
+      return fromEnv;
+    }
   }
 
   // Volumen Railway en /data: ignorar DB_PATH relativo (p. ej. "training.db")
@@ -21,10 +25,8 @@ export function getDbPath() {
     return VOLUME_DB_PATH;
   }
 
-  if (fromEnv) {
-    return path.isAbsolute(fromEnv)
-      ? fromEnv
-      : path.join(projectRoot, fromEnv);
+  if (fromEnv && !fromEnv.startsWith('/')) {
+    return path.join(projectRoot, fromEnv);
   }
 
   return path.join(projectRoot, 'training.db');
@@ -36,8 +38,14 @@ export function getDbPathResolution() {
   const effective = getDbPath();
   const volumeMounted = fs.existsSync('/data');
 
-  if (fromEnv?.startsWith('/')) {
+  if (fromEnv?.startsWith('/') && fs.existsSync(path.dirname(fromEnv))) {
     return { effective, reason: 'DB_PATH absoluto en env' };
+  }
+  if (fromEnv?.startsWith('/')) {
+    return {
+      effective,
+      reason: `DB_PATH="${fromEnv}" pero el directorio no existe aún (build); usando fallback`,
+    };
   }
   if (volumeMounted && effective === VOLUME_DB_PATH) {
     return {

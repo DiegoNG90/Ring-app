@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import path from 'node:path';
 import sql from 'better-sqlite3';
 
 function resolveDbPath(): string {
@@ -6,14 +7,20 @@ function resolveDbPath(): string {
   const volumeMounted = fs.existsSync('/data');
 
   if (fromEnv?.startsWith('/')) {
-    return fromEnv;
+    if (fs.existsSync(path.dirname(fromEnv))) {
+      return fromEnv;
+    }
   }
 
   if (volumeMounted) {
     return '/data/training.db';
   }
 
-  return fromEnv ?? 'training.db';
+  if (fromEnv && !fromEnv.startsWith('/')) {
+    return fromEnv;
+  }
+
+  return 'training.db';
 }
 
 const dbPath = resolveDbPath();
