@@ -8,7 +8,7 @@
  *   SEED_USER_3_EMAIL / SEED_USER_3_PASSWORD
  *
  * Local: definir en .env.local (ver .env.example)
- * Railway: Variables del servicio → railway run node scripts/seed-users.mjs
+ * Railway: Variables del servicio → railway ssh -- node scripts/seed-users.mjs
  *
  * Uso: pnpm db:seed-users
  */

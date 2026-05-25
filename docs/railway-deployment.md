@@ -73,7 +73,23 @@ Tras conectar el repo y configurar volumen + variables:
 
 ```bash
 railway link
-railway run node scripts/seed-users.mjs
+railway ssh -- node scripts/db-status.mjs
+railway ssh -- node scripts/seed-users.mjs
+```
+
+Los seeds deben correr **dentro** del contenedor (`railway ssh`), no con `railway run` (ese comando corre en tu PC y no escribe en el volumen `/data`).
+
+### Seed de trainings (después de usuarios)
+
+```bash
+railway ssh -- node scripts/run-sql-file.mjs src/mocks/DB_SEED_trainings.sqlite.sql
+```
+
+Si corriste el seed de trainings con el email equivocado, limpiá huérfanos y volvé a ejecutar:
+
+```bash
+railway ssh -- node scripts/cleanup-orphan-trainings.mjs
+railway ssh -- node scripts/run-sql-file.mjs src/mocks/DB_SEED_trainings.sqlite.sql
 ```
 
 ### Usuarios habilitados
