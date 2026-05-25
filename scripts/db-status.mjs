@@ -17,6 +17,12 @@ console.log('Ruta efectiva:', dbPath);
 console.log('Resolución:', reason);
 console.log('Archivo existe:', exists);
 
+if (!process.env.NODE_ENV) {
+  console.log(
+    '\n⚠ NODE_ENV no está definido. En Railway agregá NODE_ENV=production (cookies de sesión seguras).',
+  );
+}
+
 if (process.env.DB_PATH && !process.env.DB_PATH.startsWith('/') && volumeMounted) {
   console.log(
     '\n⚠ En Railway, cambiá la variable DB_PATH a /data/training.db (ahora está relativa).',

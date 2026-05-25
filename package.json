@@ -13,7 +13,8 @@
     "db:seed-users": "node scripts/seed-users.mjs",
     "db:seed-trainings": "node scripts/run-sql-file.mjs src/mocks/DB_SEED_trainings.sqlite.sql",
     "db:status": "node scripts/db-status.mjs",
-    "db:cleanup-orphan-trainings": "node scripts/cleanup-orphan-trainings.mjs"
+    "db:cleanup-orphan-trainings": "node scripts/cleanup-orphan-trainings.mjs",
+    "db:seed-all": "node scripts/seed-all.mjs"
   },
   "dependencies": {
     "@lucia-auth/adapter-sqlite": "^3.0.2",
