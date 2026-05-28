@@ -13,8 +13,10 @@ Guía paso a paso para validar la app **después del deploy en Railway**, antes 
 1. Deploy exitoso en Railway
 2. Volumen montado en `/data` + `DB_PATH=/data/training.db`
 3. Variables `SEED_USER_*` cargadas en Railway
-4. `railway run node scripts/seed-users.mjs` ejecutado
+4. `railway ssh -- node scripts/seed-all.mjs` ejecutado
 5. Login probado al menos una vez en la URL pública
+
+Documentación de scripts: [scripts.md](./scripts.md)
 
 **Antes** de compartir la URL con los 3 usuarios (ver [share-with-users.md](./share-with-users.md)).
 

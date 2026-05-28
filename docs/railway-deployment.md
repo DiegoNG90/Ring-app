@@ -2,6 +2,8 @@
 
 Guía para publicar **ring-training-app** (Next.js + better-sqlite3 + Lucia) en un solo servicio con base de datos persistente.
 
+Referencia de scripts: [scripts.md](./scripts.md) · Índice de docs: [README.md](./README.md)
+
 ## Requisitos
 
 - Cuenta en [Railway](https://railway.com)
@@ -138,9 +140,9 @@ La app abre en pantalla completa; los datos siguen viniendo del servidor (requie
 
 - **Vercel no es compatible** con `better-sqlite3` + archivo local (filesystem efímero).
 - El schema se aplica al importar `src/lib/db.ts`; no hace falta `pnpm db:init` en producción.
-- Scripts en `scripts/` respetan `DB_PATH` vía `getDbPath()` en `db-utils.mjs`.
+- Scripts en `scripts/` respetan `DB_PATH` vía `getDbPath()` en `db-utils.mjs` (ver [scripts.md](./scripts.md)).
 - Plan **Hobby (~USD 5/mes)** evita sleep por inactividad del free tier.
-- Local: `pnpm db:init && pnpm db:seed-users`
+- Local: `pnpm db:init && pnpm db:seed-all` (ver [README.md](../README.md))
 
 ## Troubleshooting
 
@@ -148,5 +150,6 @@ La app abre en pantalla completa; los datos siguen viniendo del servidor (requie
 |----------|----------------|----------|
 | DB vacía tras redeploy | Sin volumen o `DB_PATH` incorrecto | Montar volumen en `/data` y setear `DB_PATH=/data/training.db` |
 | Error al compilar `better-sqlite3` | Build sin dependencias nativas | Nixpacks + `pnpm.onlyBuiltDependencies` en `package.json` |
-| Login falla en prod | Cookie no segura / usuario inexistente / vars de seed faltantes | `NODE_ENV=production`, variables `SEED_USER_*` en Railway, y ejecutar `seed-users.mjs` |
+| Login falla en prod | Cookie no segura / usuario inexistente / vars de seed faltantes / DB efímera | `NODE_ENV=production`, `DB_PATH=/data/training.db`, volumen `/data`, ejecutar `seed-all.mjs` vía SSH |
+| Build falla en "Collecting page data" | `DB_PATH=/data/...` en build sin volumen | No poner `DB_PATH` en `nixpacks.toml`; solo en Variables de Railway en runtime |
 | App duerme | Free tier | Upgrade a Hobby o aceptar cold start |

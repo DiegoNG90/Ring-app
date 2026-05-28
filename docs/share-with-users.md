@@ -2,10 +2,12 @@
 
 Instrucciones para entregar el MVP a los 3 usuarios autorizados.
 
+Scripts y seeds: [scripts.md](./scripts.md)
+
 ## Antes de compartir
 
 - [ ] Deploy en Railway completado y verificado
-- [ ] Seed de usuarios ejecutado (`railway run node scripts/seed-users.mjs`)
+- [ ] Seed de usuarios y rutinas ejecutado (`railway ssh -- node scripts/seed-all.mjs`)
 - [ ] Auditoría de seguridad completada (ver [security-audit.md](./security-audit.md))
 - [ ] PWA probada en al menos un dispositivo Android y uno iOS
 
@@ -31,7 +33,7 @@ Enviar la contraseña de cada uno por canal seguro (WhatsApp, Signal, en persona
 
 - La app necesita conexión a internet para funcionar (no es offline).
 - Cada usuario ve solo sus propias rutinas.
-- No hay opción de crear cuenta; si olvidan la contraseña, contactarte a vos para resetearla con `scripts/reset-dev-password.mjs`.
+- No hay opción de crear cuenta; si olvidan la contraseña, resetear con `scripts/reset-dev-password.mjs` (ver [scripts.md](./scripts.md)).
 
 ## Monitoreo post-lanzamiento
 
