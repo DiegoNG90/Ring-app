@@ -11,10 +11,25 @@ import type { RoutineSegment } from './interfaces';
 
 export interface RoutineCardProps {
   training: Training;
+  /** Vista previa no interactiva (HIIT: repeticiones pendientes). */
+  disabled?: boolean;
+  /** Inicia el timer automáticamente al activarse (HIIT: vueltas 2+). */
+  autoStart?: boolean;
+  /** Modo controlado: al terminar el ciclo llama al padre en lugar de auto-reset. */
+  onComplete?: () => void;
+  /** HIIT: índice de ciclo/repetición mostrado en RoutineProgress (1-based). */
+  cycleNumber?: number;
 }
 
-export default function RoutineCard({ training }: RoutineCardProps) {
+export default function RoutineCard({
+  training,
+  disabled = false,
+  autoStart = false,
+  onComplete,
+  cycleNumber,
+}: RoutineCardProps) {
   const totalRounds = Math.max(0, Math.floor(training.round_number));
+  const isControlled = onComplete != null;
 
   const [sequence] = useState<RoutineSegment[]>(() =>
     buildRoutineSegments(totalRounds, training.rest_seconds),
@@ -34,9 +49,10 @@ export default function RoutineCard({ training }: RoutineCardProps) {
   );
 
   const handleStart = useCallback(() => {
+    if (disabled) return;
     bellSound.play();
     setHasStarted(true);
-  }, [bellSound]);
+  }, [bellSound, disabled]);
 
   const stopAllSounds = useCallback(() => {
     bellSound.stop();
@@ -54,24 +70,44 @@ export default function RoutineCard({ training }: RoutineCardProps) {
   }, [stopAllSounds]);
 
   const handleSegmentComplete = useCallback(() => {
+    if (disabled) return;
     bellSound.play();
     setCurrentCard((prev) => prev + 1);
-  }, [bellSound]);
+  }, [bellSound, disabled]);
 
   const handlePreFinish = useCallback(() => {
+    if (disabled) return;
     woodSound.play();
-  }, [woodSound]);
+  }, [woodSound, disabled]);
 
   const isFinished = sequence.length > 0 && currentCard >= sequence.length;
 
   useEffect(() => {
-    if (!isFinished) return;
+    if (!disabled) return;
+    stopAllSounds();
+    setCurrentCard(0);
+    setHasStarted(false);
+  }, [disabled, stopAllSounds]);
+
+  useEffect(() => {
+    if (disabled || !autoStart || hasStarted) return;
+    bellSound.play();
+    setHasStarted(true);
+  }, [autoStart, disabled, hasStarted, bellSound]);
+
+  useEffect(() => {
+    if (!isFinished || !isControlled) return;
+    onComplete();
+  }, [isFinished, isControlled, onComplete]);
+
+  useEffect(() => {
+    if (!isFinished || isControlled) return;
     const t = setTimeout(() => {
       setCurrentCard(0);
       setHasStarted(false);
     }, 2000);
     return () => clearTimeout(t);
-  }, [isFinished]);
+  }, [isFinished, isControlled]);
 
   if (totalRounds < 1) {
     return (
@@ -90,6 +126,10 @@ export default function RoutineCard({ training }: RoutineCardProps) {
     );
   }
 
+  if (isFinished && isControlled) {
+    return null;
+  }
+
   if (isFinished) {
     return (
       <p className="text-center text-emerald-400 font-medium py-8">
@@ -101,9 +141,13 @@ export default function RoutineCard({ training }: RoutineCardProps) {
   const active = sequence[currentCard];
   if (!active) return null;
 
-  return (
+  const content = (
     <div className="space-y-6">
-      <RoutineProgress sequence={sequence} currentCard={currentCard} />
+      <RoutineProgress
+        sequence={sequence}
+        currentCard={currentCard}
+        cycleNumber={cycleNumber}
+      />
 
       <ActiveSegmentCard
         key={`${active.type}-${active.round}-${currentCard}`}
@@ -123,6 +167,19 @@ export default function RoutineCard({ training }: RoutineCardProps) {
       <ProgressBar sequence={sequence} currentCard={currentCard} />
     </div>
   );
+
+  if (disabled) {
+    return (
+      <div
+        className="opacity-60 pointer-events-none select-none"
+        aria-disabled="true"
+      >
+        {content}
+      </div>
+    );
+  }
+
+  return content;
 }
 
 export { buildRoutineSegments } from './helpers';
