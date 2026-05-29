@@ -1,28 +1,40 @@
--- Seed de entrenamientos para SQLite (training.db).
--- Asocia los trainings al usuario por email (cambia el email si hace falta).
+-- Seed idempotente de entrenamientos spar para diego@test.com.
 --
 -- Desde la raíz del proyecto:
---   sqlite3 training.db ".read src/mocks/DB_SEED_trainings.sqlite.sql"
---
--- O en PowerShell:
---   sqlite3 training.db -init src/mocks/DB_SEED_trainings.sqlite.sql ""
+--   pnpm db:seed-trainings
 
 INSERT INTO trainings (user_id, title, description)
-VALUES (
-  (SELECT id FROM users WHERE email = 'diego@test.com'),
-  'Light spar',
-  'Rutina de sparring corta'
-);
+SELECT u.id, 'Light spar', 'Rutina de sparring corta'
+FROM users u
+WHERE u.email = 'diego@test.com'
+  AND NOT EXISTS (
+    SELECT 1 FROM trainings t
+    WHERE t.user_id = u.id AND t.title = 'Light spar'
+  );
 
 INSERT INTO training_rounds (training_id, round_number, duration_seconds, rest_seconds, repetitions)
-VALUES (last_insert_rowid(), 2, 120, 60, 0);
+SELECT t.id, 2, 120, 60, 0
+FROM trainings t
+INNER JOIN users u ON t.user_id = u.id
+WHERE u.email = 'diego@test.com' AND t.title = 'Light spar'
+  AND NOT EXISTS (
+    SELECT 1 FROM training_rounds r WHERE r.training_id = t.id
+  );
 
 INSERT INTO trainings (user_id, title, description)
-VALUES (
-  (SELECT id FROM users WHERE email = 'diego@test.com'),
-  'Medium spar',
-  'Rutina de sparring mediana (6 rounds)'
-);
+SELECT u.id, 'Medium spar', 'Rutina de sparring mediana (6 rounds)'
+FROM users u
+WHERE u.email = 'diego@test.com'
+  AND NOT EXISTS (
+    SELECT 1 FROM trainings t
+    WHERE t.user_id = u.id AND t.title = 'Medium spar'
+  );
 
 INSERT INTO training_rounds (training_id, round_number, duration_seconds, rest_seconds, repetitions)
-VALUES (last_insert_rowid(), 6, 120, 60, 0);
+SELECT t.id, 6, 120, 60, 0
+FROM trainings t
+INNER JOIN users u ON t.user_id = u.id
+WHERE u.email = 'diego@test.com' AND t.title = 'Medium spar'
+  AND NOT EXISTS (
+    SELECT 1 FROM training_rounds r WHERE r.training_id = t.id
+  );
