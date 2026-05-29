@@ -1,4 +1,4 @@
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import RoutineCard from './RoutineCard';
 import type { Training } from '@/types/Trainings';
@@ -391,6 +391,160 @@ describe('RoutineCard', () => {
 
       expect(screen.getByText(/Paso 1 de 3/)).toBeInTheDocument();
       expect(screen.queryByText('Descanso')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('HIIT mode', () => {
+    function createHiitTraining(overrides: Partial<Training> = {}): Training {
+      return createTraining({
+        round_number: 4,
+        duration_seconds: 2,
+        rest_seconds: 1,
+        repetitions: 3,
+        ...overrides,
+      });
+    }
+
+    it('shows Ciclo N in RoutineProgress when cycleNumber is set', () => {
+      render(
+        <RoutineCard
+          training={createHiitTraining()}
+          cycleNumber={2}
+        />,
+      );
+
+      expect(screen.getByText('Ciclo 2')).toBeInTheDocument();
+      expect(screen.queryByText(/^Round 1$/)).not.toBeInTheDocument();
+      expect(screen.getByText('Round 1/4')).toBeInTheDocument();
+    });
+
+    it('shows Round N in RoutineProgress without cycleNumber', () => {
+      render(<RoutineCard training={createHiitTraining()} />);
+
+      expect(screen.getByText('Round 1')).toBeInTheDocument();
+      expect(screen.queryByText(/^Ciclo 1$/)).not.toBeInTheDocument();
+    });
+
+    it('shows Descanso in RoutineProgress during rest even with cycleNumber', async () => {
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      render(
+        <RoutineCard
+          training={createHiitTraining({ round_number: 2 })}
+          cycleNumber={1}
+        />,
+      );
+
+      await user.click(screen.getByRole('button', { name: /empezar/i }));
+      await advanceRoutineTimer(2000);
+
+      await waitFor(() => {
+        const progress = screen.getByText(/Paso 2 de 3/).parentElement;
+        expect(progress).not.toBeNull();
+        expect(within(progress!).getByText('Descanso')).toBeInTheDocument();
+        expect(within(progress!).queryByText('Ciclo 1')).not.toBeInTheDocument();
+      });
+    });
+
+    it('renders disabled preview with aria-disabled and Ciclo label', () => {
+      render(
+        <RoutineCard
+          training={createHiitTraining()}
+          disabled
+          cycleNumber={3}
+        />,
+      );
+
+      expect(screen.getByText('Ciclo 3')).toBeInTheDocument();
+      const wrapper = document.querySelector('[aria-disabled="true"]');
+      expect(wrapper).toBeInTheDocument();
+      expect(wrapper).toHaveClass('pointer-events-none');
+    });
+
+    it('calls onComplete instead of auto-reset when cycle finishes (controlled)', async () => {
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      const onComplete = jest.fn();
+
+      render(
+        <RoutineCard
+          training={createHiitTraining({
+            round_number: 1,
+            rest_seconds: 0,
+            duration_seconds: 1,
+          })}
+          onComplete={onComplete}
+          cycleNumber={1}
+        />,
+      );
+
+      await user.click(screen.getByRole('button', { name: /empezar/i }));
+      await advanceRoutineTimer(1000);
+
+      await waitFor(() => {
+        expect(onComplete).toHaveBeenCalledTimes(1);
+      });
+
+      expect(screen.queryByText(/rutina completada/i)).not.toBeInTheDocument();
+      expect(screen.queryByText(/reiniciando/i)).not.toBeInTheDocument();
+    });
+
+    it('auto-starts timer and plays bell without pressing Empezar', async () => {
+      render(
+        <RoutineCard
+          training={createHiitTraining({
+            round_number: 1,
+            rest_seconds: 0,
+            duration_seconds: 3,
+          })}
+          autoStart
+          cycleNumber={2}
+        />,
+      );
+
+      expect(mockPlay).toHaveBeenCalled();
+      expect(
+        screen.getByRole('button', { name: /pausar/i }),
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByRole('button', { name: /empezar/i }),
+      ).not.toBeInTheDocument();
+
+      await advanceRoutineTimer(1000);
+      expect(getMainTimerInSegment('round')).toHaveTextContent('0:02');
+    });
+
+    it('does not auto-start when autoStart is false', () => {
+      render(
+        <RoutineCard
+          training={createHiitTraining({ round_number: 1, rest_seconds: 0 })}
+          cycleNumber={1}
+        />,
+      );
+
+      expect(
+        screen.getByRole('button', { name: /empezar/i }),
+      ).toBeInTheDocument();
+      expect(mockPlay).not.toHaveBeenCalled();
+    });
+
+    it('stops sounds when becoming disabled', () => {
+      const { rerender } = render(
+        <RoutineCard
+          training={createHiitTraining({ round_number: 1, rest_seconds: 0 })}
+          cycleNumber={1}
+        />,
+      );
+
+      mockStop.mockClear();
+
+      rerender(
+        <RoutineCard
+          training={createHiitTraining({ round_number: 1, rest_seconds: 0 })}
+          disabled
+          cycleNumber={1}
+        />,
+      );
+
+      expect(mockStop).toHaveBeenCalled();
     });
   });
 });

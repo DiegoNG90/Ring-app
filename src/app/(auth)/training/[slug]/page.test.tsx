@@ -7,16 +7,20 @@ jest.mock('@/lib/repositories/trainings', () => ({
   getTrainingById: jest.fn(),
 }));
 
-jest.mock('@/components/training/Cards/RoutineCard', () => {
-  return function MockRoutineCard({ training }: { training: Training }) {
+jest.mock('@/components/training/Cards/RoutineCard', () => ({
+  RepeatedRoutine: function MockRepeatedRoutine({
+    training,
+  }: {
+    training: Training;
+  }) {
     return (
       <div data-testid="routine-card">
         <span data-testid="routine-card-title">{training.training_title}</span>
         <span data-testid="routine-card-rounds">{training.round_number}</span>
       </div>
     );
-  };
-});
+  },
+}));
 
 const mockTraining: Training = {
   training_id: 42,
@@ -98,7 +102,7 @@ describe('TrainingRutinePage (routine detail)', () => {
       ).toBeInTheDocument();
     });
 
-    it('renders RoutineCard with training data', async () => {
+    it('renders RepeatedRoutine with training data', async () => {
       await renderTrainingDetailPage('light-spar-42');
 
       expect(screen.getByTestId('routine-card')).toBeInTheDocument();
