@@ -11,7 +11,6 @@ export class Sound {
   }
 
   private ensureAudio(): HTMLAudioElement {
-    // Si no tenemos audio creado Y estamos en el navegador (no servidor)
     if (!this.audio && typeof window !== 'undefined') {
       this.audio = new Audio(this.soundSrc);
       this.audio.volume = this.volume;
@@ -22,7 +21,14 @@ export class Sound {
   play(): Promise<void> {
     const audio = this.ensureAudio();
     audio.currentTime = 0;
-    return audio.play().catch(console.error);
+    const promise = audio.play();
+    if (!promise) return Promise.resolve();
+
+    return promise.catch((err: unknown) => {
+      const errorName = err instanceof Error ? err.name : 'unknown';
+      if (errorName === 'AbortError') return;
+      console.error(err);
+    });
   }
 
   pause(): void {
