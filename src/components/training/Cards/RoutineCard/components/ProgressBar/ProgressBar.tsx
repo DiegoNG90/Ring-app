@@ -5,10 +5,13 @@ interface ProgressBarProps {
   currentCard: number;
 }
 
-export default function ProgressBar({ sequence, currentCard }: ProgressBarProps) {
+export default function ProgressBar({
+  sequence,
+  currentCard,
+}: ProgressBarProps) {
   return (
     <div
-      className="flex justify-center gap-2 flex-wrap"
+      className="flex justify-center gap-2 flex-wrap min-h-[16px]"
       role="list"
       aria-label="Progreso de la rutina"
     >

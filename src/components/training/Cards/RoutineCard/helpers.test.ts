@@ -46,6 +46,27 @@ describe('getSegmentStepLabel', () => {
       colorClass: 'text-orange-400',
     });
   });
+
+  it('returns Ciclo N for round segments when cycleNumber is set (HIIT)', () => {
+    expect(getSegmentStepLabel({ type: 'round', round: 1 }, 3)).toEqual({
+      text: 'Ciclo 3',
+      colorClass: 'text-emerald-400',
+    });
+  });
+
+  it('returns Descanso for rest segments even when cycleNumber is set', () => {
+    expect(getSegmentStepLabel({ type: 'rest', round: 2 }, 3)).toEqual({
+      text: 'Descanso',
+      colorClass: 'text-orange-400',
+    });
+  });
+
+  it('returns Round N when cycleNumber is omitted', () => {
+    expect(getSegmentStepLabel({ type: 'round', round: 2 })).toEqual({
+      text: 'Round 2',
+      colorClass: 'text-emerald-400',
+    });
+  });
 });
 
 describe('formatTime', () => {

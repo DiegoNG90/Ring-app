@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 
-import RoutineCard from '@/components/training/Cards/RoutineCard';
+import RepeatedRoutine from '@/components/training/RepeatedRoutine';
 import { getTrainingById } from '@/lib/repositories/trainings';
 import { capitalize, normalizeUrlSlug } from '@/lib/utils/strings';
 
@@ -61,7 +61,7 @@ async function TrainingRutinePage({ params }: TrainingRutinePageProps) {
       </div>
 
       <div id="training-routine-card">
-        <RoutineCard key={training.training_id} training={training} />
+        <RepeatedRoutine key={training.training_id} training={training} />
       </div>
     </div>
   );

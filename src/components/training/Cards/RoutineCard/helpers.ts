@@ -18,16 +18,25 @@ export function buildRoutineSegments(
   return segments;
 }
 
-export function getSegmentStepLabel(segment: RoutineSegment): SegmentStepLabel {
-  if (segment.type === 'round') {
+export function getSegmentStepLabel(
+  segment: RoutineSegment,
+  cycleNumber?: number,
+): SegmentStepLabel {
+  if (segment.type === 'rest') {
     return {
-      text: `Round ${segment.round}`,
+      text: 'Descanso',
+      colorClass: 'text-orange-400',
+    };
+  }
+  if (cycleNumber != null) {
+    return {
+      text: `Ciclo ${cycleNumber}`,
       colorClass: 'text-emerald-400',
     };
   }
   return {
-    text: 'Descanso',
-    colorClass: 'text-orange-400',
+    text: `Round ${segment.round}`,
+    colorClass: 'text-emerald-400',
   };
 }
 
