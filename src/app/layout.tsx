@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { GeistMono } from 'geist/font/mono';
 import { GeistSans } from 'geist/font/sans';
+import InstallPrompt from '@/components/pwa/InstallPrompt';
 import ServiceWorkerRegister from '@/components/pwa/ServiceWorkerRegister';
 import './globals.css';
 
@@ -14,8 +15,11 @@ export const metadata: Metadata = {
     title: 'Ring Training',
   },
   icons: {
-    icon: '/icons/icon.svg',
-    apple: '/icons/icon.svg',
+    icon: [
+      { url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: '/icons/icon-180.png',
   },
 };
 
@@ -34,6 +38,7 @@ export default function RootLayout({
         className={`${GeistSans.variable} ${GeistMono.variable} antialiased`}
       >
         {children}
+        <InstallPrompt />
         <ServiceWorkerRegister />
       </body>
     </html>
