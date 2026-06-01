@@ -12,9 +12,14 @@ export default function ServiceWorkerRegister() {
       return;
     }
 
-    navigator.serviceWorker.register('/sw.js').catch(() => {
-      // Silent fail: PWA install prompt may not appear without SW.
-    });
+    navigator.serviceWorker
+      .register('/sw.js')
+      .then((registration) => {
+        console.info('[PWA] Service worker registered:', registration.scope);
+      })
+      .catch((error: unknown) => {
+        console.warn('[PWA] Service worker registration failed:', error);
+      });
   }, []);
 
   return null;
