@@ -7,8 +7,9 @@ jest.mock('@/lib/repositories/trainings', () => ({
   getTrainingById: jest.fn(),
 }));
 
-jest.mock('@/components/training/Cards/RoutineCard', () => ({
-  RepeatedRoutine: function MockRepeatedRoutine({
+jest.mock('@/components/training/RepeatedRoutine', () => ({
+  __esModule: true,
+  default: function MockRepeatedRoutine({
     training,
   }: {
     training: Training;

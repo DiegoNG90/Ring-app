@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 
-import { RepeatedRoutine } from '@/components/training/Cards/RoutineCard';
+import RepeatedRoutine from '@/components/training/RepeatedRoutine';
 import { getTrainingById } from '@/lib/repositories/trainings';
 import { capitalize, normalizeUrlSlug } from '@/lib/utils/strings';
 

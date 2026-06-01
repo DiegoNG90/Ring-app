@@ -1,8 +1,8 @@
 'use client';
 
 import { useCallback, useState } from 'react';
+import RoutineCard from '@/components/training/Cards/RoutineCard';
 import type { Training } from '@/types/Trainings';
-import RoutineCard from './RoutineCard';
 
 const EXIT_ANIMATION_MS = 500;
 
