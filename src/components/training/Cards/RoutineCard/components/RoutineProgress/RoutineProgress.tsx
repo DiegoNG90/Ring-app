@@ -14,11 +14,7 @@ export default function RoutineProgress({
   cycleNumber,
 }: RoutineProgressProps) {
   const active = sequence[currentCard];
-  const label = active
-    ? cycleNumber != null && active.type === 'round'
-      ? { text: `Ciclo ${cycleNumber}`, colorClass: 'text-emerald-400' }
-      : getSegmentStepLabel(active)
-    : null;
+  const label = active ? getSegmentStepLabel(active, cycleNumber) : null;
 
   return (
     <div className="text-center space-y-1.5">
