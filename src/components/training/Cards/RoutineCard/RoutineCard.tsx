@@ -19,6 +19,8 @@ export interface RoutineCardProps {
   onComplete?: () => void;
   /** HIIT: índice de ciclo/repetición mostrado en RoutineProgress (1-based). */
   cycleNumber?: number;
+  /** HIIT: añade un descanso final tras el último round (ciclos no finales). */
+  trailingRest?: boolean;
 }
 
 export default function RoutineCard({
@@ -27,12 +29,13 @@ export default function RoutineCard({
   autoStart = false,
   onComplete,
   cycleNumber,
+  trailingRest = false,
 }: RoutineCardProps) {
   const totalRounds = Math.max(0, Math.floor(training.round_number));
   const isControlled = onComplete != null;
 
   const [sequence] = useState<RoutineSegment[]>(() =>
-    buildRoutineSegments(totalRounds, training.rest_seconds),
+    buildRoutineSegments(totalRounds, training.rest_seconds, trailingRest),
   );
 
   const [currentCard, setCurrentCard] = useState(0);
