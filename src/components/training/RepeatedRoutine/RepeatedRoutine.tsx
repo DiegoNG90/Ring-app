@@ -76,6 +76,7 @@ function RepeatedRoutineStack({
               disabled={!isActive}
               cycleNumber={lapIndex + 1}
               autoStart={isActive && activeIndex > 0}
+              trailingRest={lapIndex < reps - 1}
               onComplete={
                 isActive ? () => handleLapComplete(lapIndex) : undefined
               }

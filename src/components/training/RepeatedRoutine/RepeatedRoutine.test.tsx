@@ -1,4 +1,4 @@
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import RepeatedRoutine from './RepeatedRoutine';
 import type { Training } from '@/types/Trainings';
@@ -188,5 +188,70 @@ describe('RepeatedRoutine', () => {
     await user.click(getInteractiveStartButtons()[0]);
     expect(mockPlay).toHaveBeenCalled();
     expect(Sound).toHaveBeenCalled();
+  });
+
+  it('non-last cycles end with a trailing rest (4 rounds → 8 steps)', () => {
+    render(
+      <RepeatedRoutine
+        training={createHiitTraining({
+          repetitions: 3,
+          round_number: 4,
+          rest_seconds: 10,
+        })}
+      />,
+    );
+
+    const cycle1 = screen.getByText('Ciclo 1').closest('.space-y-6');
+    const cycle2 = screen.getByText('Ciclo 2').closest('.space-y-6');
+    const cycle3 = screen.getByText('Ciclo 3').closest('.space-y-6');
+
+    expect(cycle1).not.toBeNull();
+    expect(cycle2).not.toBeNull();
+    expect(cycle3).not.toBeNull();
+
+    expect(within(cycle1!).getByText(/Paso 1 de 8/)).toBeInTheDocument();
+    expect(within(cycle2!).getByText(/Paso 1 de 8/)).toBeInTheDocument();
+    expect(within(cycle3!).getByText(/Paso 1 de 7/)).toBeInTheDocument();
+  });
+
+  it('completes the first cycle only after the trailing rest', async () => {
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    render(
+      <RepeatedRoutine
+        training={createHiitTraining({
+          repetitions: 3,
+          round_number: 2,
+          rest_seconds: 1,
+          duration_seconds: 1,
+        })}
+      />,
+    );
+
+    await user.click(getInteractiveStartButtons()[0]);
+
+    await advanceMs(3000);
+    expect(screen.getByText('Ciclo 1')).toBeInTheDocument();
+
+    await advanceMs(1000);
+
+    await waitFor(() => {
+      expect(screen.queryByText('Ciclo 1')).not.toBeInTheDocument();
+    });
+  });
+
+  it('single-cycle routine (repetitions <= 1) ends with a round, not a rest', () => {
+    render(
+      <RepeatedRoutine
+        training={createHiitTraining({
+          repetitions: 1,
+          round_number: 2,
+          rest_seconds: 60,
+          duration_seconds: 120,
+        })}
+      />,
+    );
+
+    expect(screen.getByText(/Paso 1 de 3/)).toBeInTheDocument();
+    expect(screen.queryByText(/^Ciclo 1$/)).not.toBeInTheDocument();
   });
 });

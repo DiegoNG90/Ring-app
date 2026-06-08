@@ -546,5 +546,71 @@ describe('RoutineCard', () => {
 
       expect(mockStop).toHaveBeenCalled();
     });
+
+    it('adds a trailing rest step when trailingRest is true', () => {
+      render(
+        <RoutineCard
+          training={createHiitTraining({ round_number: 4, rest_seconds: 10 })}
+          trailingRest
+          cycleNumber={1}
+        />,
+      );
+
+      expect(screen.getByText(/Paso 1 de 8/)).toBeInTheDocument();
+    });
+
+    it('ends with a round when trailingRest is false (last cycle)', () => {
+      render(
+        <RoutineCard
+          training={createHiitTraining({ round_number: 4, rest_seconds: 10 })}
+          cycleNumber={3}
+        />,
+      );
+
+      expect(screen.getByText(/Paso 1 de 7/)).toBeInTheDocument();
+    });
+
+    it('calls onComplete only after the trailing rest when trailingRest is true', async () => {
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      const onComplete = jest.fn();
+
+      render(
+        <RoutineCard
+          training={createHiitTraining({
+            round_number: 2,
+            duration_seconds: 1,
+            rest_seconds: 1,
+          })}
+          trailingRest
+          onComplete={onComplete}
+          cycleNumber={1}
+        />,
+      );
+
+      await user.click(screen.getByRole('button', { name: /empezar/i }));
+      await advanceRoutineTimer(1000);
+
+      await waitFor(() => {
+        expect(screen.getByText(/Paso 2 de 4/)).toBeInTheDocument();
+      });
+
+      await advanceRoutineTimer(1000);
+
+      await waitFor(() => {
+        expect(screen.getByText(/Paso 3 de 4/)).toBeInTheDocument();
+      });
+
+      await advanceRoutineTimer(1000);
+
+      await waitFor(() => {
+        expect(screen.getByText(/Paso 4 de 4/)).toBeInTheDocument();
+      });
+
+      await advanceRoutineTimer(1000);
+
+      await waitFor(() => {
+        expect(onComplete).toHaveBeenCalledTimes(1);
+      });
+    });
   });
 });

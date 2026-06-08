@@ -30,6 +30,35 @@ describe('buildRoutineSegments', () => {
       { type: 'round', round: 3 },
     ]);
   });
+
+  it('appends a trailing rest after the last round when trailingRest is true', () => {
+    expect(buildRoutineSegments(4, 10, true)).toEqual([
+      { type: 'round', round: 1 },
+      { type: 'rest', round: 1 },
+      { type: 'round', round: 2 },
+      { type: 'rest', round: 2 },
+      { type: 'round', round: 3 },
+      { type: 'rest', round: 3 },
+      { type: 'round', round: 4 },
+      { type: 'rest', round: 4 },
+    ]);
+  });
+
+  it('does not append a trailing rest when there is no rest, even if trailingRest is true', () => {
+    expect(buildRoutineSegments(3, 0, true)).toEqual([
+      { type: 'round', round: 1 },
+      { type: 'round', round: 2 },
+      { type: 'round', round: 3 },
+    ]);
+  });
+
+  it('ends with a round when trailingRest is false (last cycle / single cycle)', () => {
+    expect(buildRoutineSegments(2, 60, false)).toEqual([
+      { type: 'round', round: 1 },
+      { type: 'rest', round: 1 },
+      { type: 'round', round: 2 },
+    ]);
+  });
 });
 
 describe('getSegmentStepLabel', () => {
