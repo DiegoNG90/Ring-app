@@ -6,8 +6,10 @@ export interface UseSegmentTimerOptions {
   type: SegmentType;
   cardKey: number;
   hasStarted: boolean;
+  intervalSeconds?: number;
   onComplete?: () => void;
   onPreFinish?: () => void;
+  onInterval?: () => void;
   onStart?: () => void;
   onReset?: () => void;
   onPause?: () => void;
@@ -28,8 +30,10 @@ export function useSegmentTimer({
   type,
   cardKey,
   hasStarted,
+  intervalSeconds = 0,
   onComplete,
   onPreFinish,
+  onInterval,
   onStart,
   onReset,
   onPause,
@@ -39,10 +43,12 @@ export function useSegmentTimer({
   const [isPaused, setIsPaused] = useState(false);
   const completionFired = useRef(false);
   const preFinishFired = useRef(false);
+  const intervalFired = useRef<Set<number>>(new Set());
 
   useEffect(() => {
     completionFired.current = false;
     preFinishFired.current = false;
+    intervalFired.current = new Set();
   }, [cardKey]);
 
   useEffect(() => {
@@ -73,6 +79,7 @@ export function useSegmentTimer({
   useEffect(() => {
     if (
       type === 'round' &&
+      intervalSeconds <= 0 &&
       totalTime > 10 &&
       timeLeft === 10 &&
       !preFinishFired.current
@@ -80,7 +87,29 @@ export function useSegmentTimer({
       preFinishFired.current = true;
       onPreFinish?.();
     }
-  }, [timeLeft, type, totalTime, onPreFinish]);
+  }, [timeLeft, type, totalTime, intervalSeconds, onPreFinish]);
+
+  useEffect(() => {
+    if (
+      type !== 'round' ||
+      intervalSeconds <= 0 ||
+      totalTime <= 0 ||
+      timeLeft <= 0
+    ) {
+      return;
+    }
+
+    const elapsed = totalTime - timeLeft;
+    if (
+      elapsed > 0 &&
+      elapsed < totalTime &&
+      elapsed % intervalSeconds === 0 &&
+      !intervalFired.current.has(elapsed)
+    ) {
+      intervalFired.current.add(elapsed);
+      onInterval?.();
+    }
+  }, [timeLeft, type, totalTime, intervalSeconds, onInterval]);
 
   useEffect(() => {
     if (totalTime <= 0 || timeLeft !== 0 || completionFired.current) return;
@@ -127,6 +156,7 @@ export function useSegmentTimer({
     setIsPaused(false);
     completionFired.current = false;
     preFinishFired.current = false;
+    intervalFired.current = new Set();
   }, [cardKey, onReset, totalTime]);
 
   return {
