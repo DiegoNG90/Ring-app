@@ -61,9 +61,19 @@ export function getDbPathResolution() {
   return { effective, reason: 'Sin DB_PATH: training.db en raíz del proyecto' };
 }
 
+function ensureIntervalSecondsColumn(db) {
+  const columns = db.prepare('PRAGMA table_info(training_rounds)').all();
+  if (!columns.some((col) => col.name === 'interval_seconds')) {
+    db.exec(
+      'ALTER TABLE training_rounds ADD COLUMN interval_seconds INTEGER DEFAULT 0',
+    );
+  }
+}
+
 /** Abre training.db y aplica CREATE TABLE IF NOT EXISTS. */
 export function openDbWithSchema(dbPath = getDbPath()) {
   const db = sql(dbPath);
   db.exec(fs.readFileSync(schemaPath, 'utf8'));
+  ensureIntervalSecondsColumn(db);
   return db;
 }

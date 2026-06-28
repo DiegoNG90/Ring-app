@@ -345,4 +345,63 @@ describe('useSegmentTimer', () => {
 
     expect(onPause).not.toHaveBeenCalled();
   });
+
+  it('llama onInterval cada intervalSeconds durante un round', async () => {
+    const onInterval = jest.fn();
+    renderHook(() =>
+      useSegmentTimer({
+        totalTime: 80,
+        type: 'round',
+        cardKey: 0,
+        hasStarted: true,
+        intervalSeconds: 20,
+        onInterval,
+      }),
+    );
+
+    await advanceTimer(20000);
+    expect(onInterval).toHaveBeenCalledTimes(1);
+
+    await advanceTimer(20000);
+    expect(onInterval).toHaveBeenCalledTimes(2);
+
+    await advanceTimer(20000);
+    expect(onInterval).toHaveBeenCalledTimes(3);
+  });
+
+  it('no llama onInterval al completar el round', async () => {
+    const onInterval = jest.fn();
+    renderHook(() =>
+      useSegmentTimer({
+        totalTime: 20,
+        type: 'round',
+        cardKey: 0,
+        hasStarted: true,
+        intervalSeconds: 20,
+        onInterval,
+      }),
+    );
+
+    await advanceTimer(20000);
+
+    expect(onInterval).not.toHaveBeenCalled();
+  });
+
+  it('no llama onPreFinish cuando intervalSeconds > 0', async () => {
+    const onPreFinish = jest.fn();
+    renderHook(() =>
+      useSegmentTimer({
+        totalTime: 80,
+        type: 'round',
+        cardKey: 0,
+        hasStarted: true,
+        intervalSeconds: 20,
+        onPreFinish,
+      }),
+    );
+
+    await advanceTimer(70000);
+
+    expect(onPreFinish).not.toHaveBeenCalled();
+  });
 });

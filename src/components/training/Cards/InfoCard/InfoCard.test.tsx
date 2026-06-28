@@ -41,6 +41,7 @@ const mockResult = {
   duration_seconds: 125,
   rest_seconds: 30,
   repetitions: 0,
+  interval_seconds: 0,
 };
 
 describe('InfoCard', () => {

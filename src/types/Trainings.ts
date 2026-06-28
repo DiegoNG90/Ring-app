@@ -7,4 +7,5 @@ export interface Training {
   duration_seconds: number;
   rest_seconds: number;
   repetitions: number;
+  interval_seconds: number;
 }

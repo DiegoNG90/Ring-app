@@ -28,5 +28,8 @@ function run(scriptName, args = []) {
 run('seed-users.mjs');
 console.log('');
 run('run-sql-file.mjs', ['src/mocks/DB_SEED_trainings.sqlite.sql']);
-
+console.log('');
+run('run-sql-file.mjs', [
+  'src/mocks/DB_SEED_hiit_continuous_trainings.sqlite.sql',
+]);
 console.log('\nSeed completo. Verificá con: node scripts/db-status.mjs');

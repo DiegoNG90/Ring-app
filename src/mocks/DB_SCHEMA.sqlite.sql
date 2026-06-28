@@ -33,5 +33,6 @@ CREATE TABLE IF NOT EXISTS training_rounds (
   duration_seconds INTEGER,
   rest_seconds INTEGER,
   repetitions INTEGER DEFAULT 1,
+  interval_seconds INTEGER DEFAULT 0,
   FOREIGN KEY (training_id) REFERENCES trainings(id)
 );

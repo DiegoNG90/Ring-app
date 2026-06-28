@@ -31,6 +31,7 @@ const mockTraining: Training = {
   duration_seconds: 180,
   rest_seconds: 60,
   repetitions: 0,
+  interval_seconds: 0,
 };
 
 describe('TrainingRoutinesListItem', () => {

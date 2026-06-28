@@ -12,13 +12,14 @@ import { useSegmentTimer } from './useSegmentTimer';
 export interface ActiveSegmentCardProps {
   training: Pick<
     Training,
-    'training_title' | 'duration_seconds' | 'rest_seconds'
+    'training_title' | 'duration_seconds' | 'rest_seconds' | 'interval_seconds'
   >;
   type: SegmentType;
   currentRound: number;
   totalRounds: number;
   onComplete?: () => void;
   onPreFinish?: () => void;
+  onInterval?: () => void;
   cardKey: number;
   hasStarted: boolean;
   onStart?: () => void;
@@ -33,6 +34,7 @@ export default function ActiveSegmentCard({
   totalRounds,
   onComplete,
   onPreFinish,
+  onInterval,
   cardKey,
   hasStarted,
   onStart,
@@ -55,8 +57,11 @@ export default function ActiveSegmentCard({
     type,
     cardKey,
     hasStarted,
+    intervalSeconds:
+      type === 'round' ? training.interval_seconds : undefined,
     onComplete,
     onPreFinish,
+    onInterval,
     onStart,
     onReset,
     onPause,

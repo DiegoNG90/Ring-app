@@ -77,9 +77,20 @@ db.exec(`
     duration_seconds INTEGER,
     rest_seconds INTEGER,
     repetitions INTEGER DEFAULT 1,
+    interval_seconds INTEGER DEFAULT 0,
     FOREIGN KEY (training_id) REFERENCES trainings(id)
   );
 `);
+
+const trainingRoundsColumns = db
+  .prepare('PRAGMA table_info(training_rounds)')
+  .all() as { name: string }[];
+
+if (!trainingRoundsColumns.some((col) => col.name === 'interval_seconds')) {
+  db.exec(
+    'ALTER TABLE training_rounds ADD COLUMN interval_seconds INTEGER DEFAULT 0',
+  );
+}
 
 // const hasTrainings =
 //   db.prepare('SELECT COUNT(*) as count FROM trainings').get().count > 0;

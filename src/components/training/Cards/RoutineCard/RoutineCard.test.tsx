@@ -25,6 +25,7 @@ function createTraining(overrides: Partial<Training> = {}): Training {
     duration_seconds: 12,
     rest_seconds: 5,
     repetitions: 0,
+    interval_seconds: 0,
     ...overrides,
   };
 }
@@ -611,6 +612,171 @@ describe('RoutineCard', () => {
       await waitFor(() => {
         expect(onComplete).toHaveBeenCalledTimes(1);
       });
+    });
+  });
+
+  describe('HIIT continuous mode', () => {
+    function createContinuousHiitTraining(
+      overrides: Partial<Training> = {},
+    ): Training {
+      return createTraining({
+        training_title: 'HIIT rounds continuos',
+        round_number: 4,
+        duration_seconds: 8,
+        rest_seconds: 2,
+        repetitions: 1,
+        interval_seconds: 2,
+        ...overrides,
+      });
+    }
+
+    it('reproduce campana en cada intervalo durante un round continuo', async () => {
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      render(
+        <RoutineCard
+          training={createContinuousHiitTraining({
+            round_number: 1,
+            rest_seconds: 0,
+          })}
+        />,
+      );
+
+      await user.click(screen.getByRole('button', { name: /empezar/i }));
+      mockPlay.mockClear();
+
+      await advanceRoutineTimer(2000);
+      expect(mockPlay).toHaveBeenCalledTimes(1);
+      expect(getSoundSrc(0)).toBe('/sounds/boxing-bell-liviano.mp3');
+
+      await advanceRoutineTimer(2000);
+      expect(mockPlay).toHaveBeenCalledTimes(2);
+
+      await advanceRoutineTimer(2000);
+      expect(mockPlay).toHaveBeenCalledTimes(3);
+    });
+
+    it('no reproduce maderas cuando interval_seconds está configurado', async () => {
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      render(
+        <RoutineCard
+          training={createContinuousHiitTraining({
+            round_number: 1,
+            rest_seconds: 0,
+            duration_seconds: 80,
+            interval_seconds: 20,
+          })}
+        />,
+      );
+
+      await user.click(screen.getByRole('button', { name: /empezar/i }));
+      mockPlay.mockClear();
+
+      await advanceRoutineTimer(20000);
+      await advanceRoutineTimer(20000);
+      await advanceRoutineTimer(20000);
+      await advanceRoutineTimer(10000);
+
+      expect(mockPlay).toHaveBeenCalledTimes(3);
+      expect(getSoundSrc(1)).toBe('/sounds/maderas_pre_fin_round.mpeg');
+    });
+
+    it('avanza al descanso tras completar un round continuo', async () => {
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      render(
+        <RoutineCard
+          training={createContinuousHiitTraining({
+            round_number: 2,
+          })}
+        />,
+      );
+
+      await user.click(screen.getByRole('button', { name: /empezar/i }));
+      await advanceRoutineTimer(8000);
+
+      await waitFor(() => {
+        expect(screen.getByText(/Paso 2 de 3/)).toBeInTheDocument();
+        expect(
+          screen.getByText(/Descanso · después del round 1/i),
+        ).toBeInTheDocument();
+        expect(getMainTimerInSegment('rest')).toHaveTextContent('0:02');
+      });
+    });
+
+    it('pasa al round 2 tras el descanso entre rounds', async () => {
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      render(<RoutineCard training={createContinuousHiitTraining()} />);
+
+      await user.click(screen.getByRole('button', { name: /empezar/i }));
+      await advanceRoutineTimer(8000);
+
+      await waitFor(() => {
+        expect(
+          screen.getByText(/Descanso · después del round 1/i),
+        ).toBeInTheDocument();
+      });
+
+      await advanceRoutineTimer(2000);
+
+      await waitFor(() => {
+        expect(screen.getByText(/Paso 3 de 7/)).toBeInTheDocument();
+        expect(screen.getByText('Round 2/4')).toBeInTheDocument();
+        expect(getMainTimerInSegment('round')).toHaveTextContent('0:08');
+      });
+    });
+
+    it('termina en el round 4 sin descanso final', async () => {
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      render(<RoutineCard training={createContinuousHiitTraining()} />);
+
+      expect(screen.getByText(/Paso 1 de 7/)).toBeInTheDocument();
+
+      await user.click(screen.getByRole('button', { name: /empezar/i }));
+
+      await advanceRoutineTimer(8000);
+      await waitFor(() => {
+        expect(
+          screen.getByText(/Descanso · después del round 1/i),
+        ).toBeInTheDocument();
+      });
+
+      await advanceRoutineTimer(2000);
+      await waitFor(() => {
+        expect(screen.getByText('Round 2/4')).toBeInTheDocument();
+      });
+
+      await advanceRoutineTimer(8000);
+      await waitFor(() => {
+        expect(
+          screen.getByText(/Descanso · después del round 2/i),
+        ).toBeInTheDocument();
+      });
+
+      await advanceRoutineTimer(2000);
+      await waitFor(() => {
+        expect(screen.getByText('Round 3/4')).toBeInTheDocument();
+      });
+
+      await advanceRoutineTimer(8000);
+      await waitFor(() => {
+        expect(
+          screen.getByText(/Descanso · después del round 3/i),
+        ).toBeInTheDocument();
+      });
+
+      await advanceRoutineTimer(2000);
+      await waitFor(() => {
+        expect(screen.getByText('Round 4/4')).toBeInTheDocument();
+      });
+
+      await advanceRoutineTimer(8000);
+
+      await waitFor(() => {
+        expect(screen.getByText(/rutina completada/i)).toBeInTheDocument();
+      });
+
+      expect(
+        screen.queryByText(/Descanso · después del round 4/i),
+      ).not.toBeInTheDocument();
     });
   });
 });

@@ -13,6 +13,7 @@
     "db:seed-users": "node scripts/seed-users.mjs",
     "db:seed-trainings": "node scripts/run-sql-file.mjs src/mocks/DB_SEED_trainings.sqlite.sql",
     "db:seed-hiit": "node scripts/run-sql-file.mjs src/mocks/DB_SEED_hiit_trainings.sqlite.sql",
+    "db:seed-hiit-continuous": "node scripts/run-sql-file.mjs src/mocks/DB_SEED_hiit_continuous_trainings.sqlite.sql",
     "db:status": "node scripts/db-status.mjs",
     "db:cleanup-orphan-trainings": "node scripts/cleanup-orphan-trainings.mjs",
     "db:seed-all": "node scripts/seed-all.mjs",

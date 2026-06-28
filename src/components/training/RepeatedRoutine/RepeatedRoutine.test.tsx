@@ -31,6 +31,7 @@ function createHiitTraining(overrides: Partial<Training> = {}): Training {
     duration_seconds: 1,
     rest_seconds: 0,
     repetitions: 3,
+    interval_seconds: 0,
     ...overrides,
   };
 }

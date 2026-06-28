@@ -83,6 +83,11 @@ export default function RoutineCard({
     woodSound.play();
   }, [woodSound, disabled]);
 
+  const handleInterval = useCallback(() => {
+    if (disabled) return;
+    bellSound.play();
+  }, [bellSound, disabled]);
+
   const isFinished = sequence.length > 0 && currentCard >= sequence.length;
 
   useEffect(() => {
@@ -160,6 +165,7 @@ export default function RoutineCard({
         totalRounds={totalRounds}
         onComplete={handleSegmentComplete}
         onPreFinish={handlePreFinish}
+        onInterval={handleInterval}
         cardKey={currentCard}
         hasStarted={hasStarted}
         onStart={handleStart}
