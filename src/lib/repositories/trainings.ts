@@ -13,7 +13,8 @@ export function getAllTrainingsByUserId(userId: number): Training[] {
             tr.round_number,
             tr.duration_seconds,
             tr.rest_seconds,
-            tr.repetitions
+            tr.repetitions,
+            tr.interval_seconds
         FROM trainings t
         INNER JOIN training_rounds tr ON t.id = tr.training_id  
         WHERE t.user_id = ? 
@@ -37,7 +38,8 @@ export function getTrainingById(id: number): Training | undefined {
             tr.round_number,
             tr.duration_seconds,
             tr.rest_seconds,
-            tr.repetitions
+            tr.repetitions,
+            tr.interval_seconds
         FROM trainings t
         INNER JOIN training_rounds tr ON t.id = tr.training_id  
         WHERE t.id = ? 

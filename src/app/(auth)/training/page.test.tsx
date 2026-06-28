@@ -52,6 +52,7 @@ const mockTrainings: Training[] = [
     duration_seconds: 180,
     rest_seconds: 60,
     repetitions: 0,
+    interval_seconds: 0,
   },
   {
     training_id: 2,
@@ -62,6 +63,7 @@ const mockTrainings: Training[] = [
     duration_seconds: 120,
     rest_seconds: 30,
     repetitions: 0,
+    interval_seconds: 0,
   },
 ];
 

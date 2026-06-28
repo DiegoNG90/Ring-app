@@ -25,6 +25,7 @@ function createTraining(overrides: Partial<Training> = {}): Training {
     duration_seconds: 12,
     rest_seconds: 5,
     repetitions: 0,
+    interval_seconds: 0,
     ...overrides,
   };
 }
