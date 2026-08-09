@@ -69,14 +69,16 @@ Para desarrollo local, copiá `.env.example` a `.env.local` y completá las cont
 Tras conectar el repo y configurar volumen + variables:
 
 1. Railway hará build con `pnpm install && pnpm build`.
-2. Al arrancar, `src/lib/db.ts` crea las tablas si no existen (`CREATE TABLE IF NOT EXISTS`).
+2. Al arrancar, `src/lib/db.ts` crea las tablas si no existen y **migra el esquema legado** (`trainings.user_id`) al modelo normalizado si corresponde.
 3. Generá dominio público (Settings → **Networking** → **Generate Domain**).
-4. Ejecutá el seed de usuarios autorizados (Railway inyecta las variables del servicio):
+4. Ejecutá el seed de usuarios y rutinas (Railway inyecta las variables del servicio):
 
 ```bash
 railway link
+railway ssh -- node scripts/migrate-normalize-db.mjs
 railway ssh -- node scripts/db-status.mjs
 railway ssh -- node scripts/seed-all.mjs
+railway ssh -- node scripts/db-status.mjs
 ```
 
 O por separado: `seed-users.mjs` y luego `run-sql-file.mjs` con el SQL de trainings.
@@ -89,11 +91,11 @@ Los seeds deben correr **dentro** del contenedor (`railway ssh`), no con `railwa
 railway ssh -- node scripts/run-sql-file.mjs src/mocks/DB_SEED_trainings.sqlite.sql
 ```
 
-Si corriste el seed de trainings con el email equivocado, limpiá huérfanos y volvé a ejecutar:
+Si corriste seeds parciales o quedaron rutinas en el catálogo sin usuarios asignados:
 
 ```bash
 railway ssh -- node scripts/cleanup-orphan-trainings.mjs
-railway ssh -- node scripts/run-sql-file.mjs src/mocks/DB_SEED_trainings.sqlite.sql
+railway ssh -- node scripts/seed-all.mjs
 ```
 
 ### Usuarios habilitados
@@ -140,6 +142,8 @@ La app abre en pantalla completa; los datos siguen viniendo del servidor (requie
 
 - **Vercel no es compatible** con `better-sqlite3` + archivo local (filesystem efímero).
 - El schema se aplica al importar `src/lib/db.ts`; no hace falta `pnpm db:init` en producción.
+- Tras el refactor de normalización, **re-seed obligatorio** (`seed-all.mjs`) para repoblar catálogo y asignaciones.
+- Modelo de datos: [database.md](./database.md)
 - Scripts en `scripts/` respetan `DB_PATH` vía `getDbPath()` en `db-utils.mjs` (ver [scripts.md](./scripts.md)).
 - Plan **Hobby (~USD 5/mes)** evita sleep por inactividad del free tier.
 - Local: `pnpm db:init && pnpm db:seed-all` (ver [README.md](../README.md))

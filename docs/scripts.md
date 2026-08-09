@@ -31,7 +31,9 @@ Core helper module (not run directly).
 |--------|---------|
 | `getDbPath()` | Returns the SQLite file path for the current environment. |
 | `getDbPathResolution()` | Returns `{ effective, reason }` for debugging (used by `db-status.mjs`). |
-| `openDbWithSchema(dbPath?)` | Opens the DB with better-sqlite3 and runs `src/mocks/DB_SCHEMA.sqlite.sql` (`CREATE TABLE IF NOT EXISTS`). |
+| `openDbWithSchema(dbPath?)` | Opens the DB, migrates legacy schema if needed, runs `DB_SCHEMA.sqlite.sql`, returns `{ db, migrated }`. |
+| `isLegacyTrainingsSchema(db)` | Returns true if `trainings` has a `user_id` column (pre-normalization). |
+| `migrateLegacySchema(db)` | Drops `training_rounds` and `trainings` when legacy schema is detected. |
 
 ### `load-env.mjs`
 
@@ -87,7 +89,7 @@ railway ssh -- node scripts/seed-users.mjs
 
 ### `run-sql-file.mjs`
 
-**pnpm:** `pnpm db:seed-trainings` (wraps the trainings SQL file)
+**pnpm:** `pnpm db:seed-trainings`, `pnpm db:seed-hiit`, `pnpm db:seed-hiit-continuous`
 
 Executes a `.sql` file against the current database.
 
@@ -95,9 +97,9 @@ Executes a `.sql` file against the current database.
 node scripts/run-sql-file.mjs src/mocks/DB_SEED_trainings.sqlite.sql
 ```
 
-- **When:** After users exist (trainings reference `user_id` via email subquery).
-- **Idempotent:** **No** — each run inserts new rows. Avoid running twice unless you want duplicates.
-- **Default seed file:** `src/mocks/DB_SEED_trainings.sqlite.sql` (sample sparring routines for `diego@test.com`).
+- **When:** After users exist (assignment phase references user emails).
+- **Idempotent:** Yes — seeds use `NOT EXISTS` / `INSERT OR IGNORE`.
+- **Structure:** Each seed file inserts into the shared catalog (`trainings` + `training_rounds`), then assigns routines to MVP users via `users_trainings`.
 
 ---
 
@@ -109,6 +111,7 @@ Runs in order:
 
 1. `seed-users.mjs`
 2. `run-sql-file.mjs` with `DB_SEED_trainings.sqlite.sql`
+3. `run-sql-file.mjs` with `DB_SEED_hiit_continuous_trainings.sqlite.sql`
 
 Prints the resolved DB path before seeding.
 
@@ -133,8 +136,11 @@ Use this for first-time production setup after deploy.
 Diagnostic report:
 
 - `NODE_ENV`, `DB_PATH` (raw env), volume mount (`/data`), effective path, resolution reason
+- Legacy schema migration notice (if applicable)
 - User count and emails
-- Training count, orphan count (`user_id IS NULL`), owner per routine
+- Catalog count (`trainings`), assignment count (`users_trainings`)
+- Orphan catalog entries (trainings with no assignments) and broken assignment rows
+- Per-training assigned user count and full assignment list
 - Warning if `/app/training.db` exists (ephemeral DB from misconfigured deploys)
 
 ```bash
@@ -150,9 +156,12 @@ Run this **before and after** seeds to confirm you are writing to the correct fi
 
 **pnpm:** `pnpm db:cleanup-orphan-trainings`
 
-Deletes trainings (and their rounds) where `user_id IS NULL`.
+Removes:
 
-Typical cause: running the trainings seed with a wrong email in the SQL (user subquery returned NULL).
+- Catalog trainings with **no** rows in `users_trainings` (and their rounds)
+- Broken `users_trainings` rows (invalid `user_id` or `training_id`)
+
+Typical cause: partial seed or manual DB edits.
 
 ```bash
 pnpm db:cleanup-orphan-trainings
@@ -160,6 +169,27 @@ railway ssh -- node scripts/cleanup-orphan-trainings.mjs
 ```
 
 - **Idempotent:** Yes — no-op if there are no orphans.
+
+---
+
+### `migrate-normalize-db.mjs`
+
+**pnpm:** `pnpm db:migrate-normalize`
+
+Explicitly migrates from the legacy schema (`trainings.user_id`) to the normalized schema (`trainings` catalog + `users_trainings` pivot).
+
+- Preserves `users` and `sessions`
+- Drops and recreates `trainings` and `training_rounds`
+- Also runs automatically on app startup via `src/lib/db.ts`
+
+```bash
+pnpm db:migrate-normalize
+pnpm db:seed-all
+railway ssh -- node scripts/migrate-normalize-db.mjs
+railway ssh -- node scripts/seed-all.mjs
+```
+
+After migration, **re-seed is required** to repopulate the catalog and assignments.
 
 ---
 
@@ -192,8 +222,12 @@ Public sign-up in the UI is disabled; this script is the supported way to recove
 
 | File | Role |
 |------|------|
-| `src/mocks/DB_SCHEMA.sqlite.sql` | Canonical schema (users, sessions, trainings, training_rounds). |
-| `src/mocks/DB_SEED_trainings.sqlite.sql` | Sample routines seed (edit owner email before production seed). |
+| `src/mocks/DB_SCHEMA.sqlite.sql` | Canonical schema (users, sessions, trainings, users_trainings, training_rounds). |
+| `src/mocks/DB_SEED_trainings.sqlite.sql` | Sparring routines: catalog + MVP user assignments. |
+| `src/mocks/DB_SEED_hiit_trainings.sqlite.sql` | HIIT routines (repetitions > 1). |
+| `src/mocks/DB_SEED_hiit_continuous_trainings.sqlite.sql` | Continuous HIIT (`interval_seconds`). |
+
+See also [database.md](./database.md) for the normalized data model.
 
 ---
 
@@ -210,13 +244,21 @@ pnpm db:status
 pnpm dev
 ```
 
+If upgrading from the legacy schema (existing `training.db` with `trainings.user_id`):
+
+```bash
+pnpm db:migrate-normalize
+pnpm db:seed-all
+pnpm db:status
+```
+
 ### Fresh Railway deploy
 
 1. Volume at `/data`, `DB_PATH=/data/training.db`, `NODE_ENV=production`, `SEED_USER_*` set.
-2. Wait for successful deploy.
+2. Wait for successful deploy (app migrates legacy schema on startup if needed).
 3. `railway ssh -- node scripts/db-status.mjs` → confirm `/data/training.db`.
 4. `railway ssh -- node scripts/seed-all.mjs`
-5. `railway ssh -- node scripts/db-status.mjs` → expect 3 users, 2 trainings.
+5. `railway ssh -- node scripts/db-status.mjs` → expect 3 users, **3 catalog trainings**, **3 assignments per user** (from `seed-all`; run HIIT seeds separately for full catalog of 5).
 
 ### Wrong trainings seed (orphans)
 
@@ -241,8 +283,11 @@ Always use **SSH** for production seeds.
 | npm script | Script file |
 |------------|-------------|
 | `db:init` | `init-db.mjs` |
+| `db:migrate-normalize` | `migrate-normalize-db.mjs` |
 | `db:seed-users` | `seed-users.mjs` |
 | `db:seed-trainings` | `run-sql-file.mjs` + trainings SQL |
+| `db:seed-hiit` | `run-sql-file.mjs` + HIIT SQL |
+| `db:seed-hiit-continuous` | `run-sql-file.mjs` + HIIT continuous SQL |
 | `db:seed-all` | `seed-all.mjs` |
 | `db:status` | `db-status.mjs` |
 | `db:cleanup-orphan-trainings` | `cleanup-orphan-trainings.mjs` |

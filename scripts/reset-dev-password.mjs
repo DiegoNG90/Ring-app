@@ -38,7 +38,7 @@ if (!email || !password) {
   process.exit(1);
 }
 
-const db = openDbWithSchema();
+const { db } = openDbWithSchema();
 const hashed = hashUserPassword(password);
 
 if (createUserMode) {

@@ -61,7 +61,45 @@ export function getDbPathResolution() {
   return { effective, reason: 'Sin DB_PATH: training.db en raíz del proyecto' };
 }
 
+export function isLegacyTrainingsSchema(db) {
+  const tableExists = db
+    .prepare(
+      "SELECT name FROM sqlite_master WHERE type='table' AND name='trainings'",
+    )
+    .get();
+
+  if (!tableExists) {
+    return false;
+  }
+
+  const columns = db.prepare('PRAGMA table_info(trainings)').all();
+  return columns.some((col) => col.name === 'user_id');
+}
+
+export function migrateLegacySchema(db) {
+  if (!isLegacyTrainingsSchema(db)) {
+    return false;
+  }
+
+  db.exec(`
+    DROP TABLE IF EXISTS training_rounds;
+    DROP TABLE IF EXISTS trainings;
+  `);
+
+  return true;
+}
+
 function ensureIntervalSecondsColumn(db) {
+  const tableExists = db
+    .prepare(
+      "SELECT name FROM sqlite_master WHERE type='table' AND name='training_rounds'",
+    )
+    .get();
+
+  if (!tableExists) {
+    return;
+  }
+
   const columns = db.prepare('PRAGMA table_info(training_rounds)').all();
   if (!columns.some((col) => col.name === 'interval_seconds')) {
     db.exec(
@@ -73,7 +111,8 @@ function ensureIntervalSecondsColumn(db) {
 /** Abre training.db y aplica CREATE TABLE IF NOT EXISTS. */
 export function openDbWithSchema(dbPath = getDbPath()) {
   const db = sql(dbPath);
+  const migrated = migrateLegacySchema(db);
   db.exec(fs.readFileSync(schemaPath, 'utf8'));
   ensureIntervalSecondsColumn(db);
-  return db;
+  return { db, migrated };
 }

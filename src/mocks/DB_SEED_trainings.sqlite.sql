@@ -1,40 +1,42 @@
--- Seed idempotente de entrenamientos spar para diego@test.com, profe y alumno.
+-- Seed idempotente de entrenamientos spar (catálogo compartido + asignación a usuarios).
 --
 -- Desde la raíz del proyecto:
 --   pnpm db:seed-trainings
 
-INSERT INTO trainings (user_id, title, description)
-SELECT u.id, 'Light spar', 'Rutina de sparring corta'
-FROM users u
-WHERE u.email IN ('diego@test.com', 'profe', 'alumno')
-  AND NOT EXISTS (
-    SELECT 1 FROM trainings t
-    WHERE t.user_id = u.id AND t.title = 'Light spar'
-  );
+-- Catálogo: Light spar
+INSERT INTO trainings (title, description)
+SELECT 'Light spar', 'Rutina de sparring corta'
+WHERE NOT EXISTS (
+  SELECT 1 FROM trainings WHERE title = 'Light spar'
+);
 
 INSERT INTO training_rounds (training_id, round_number, duration_seconds, rest_seconds, repetitions)
 SELECT t.id, 2, 120, 60, 0
 FROM trainings t
-INNER JOIN users u ON t.user_id = u.id
-WHERE u.email IN ('diego@test.com', 'profe', 'alumno') AND t.title = 'Light spar'
+WHERE t.title = 'Light spar'
   AND NOT EXISTS (
     SELECT 1 FROM training_rounds r WHERE r.training_id = t.id
   );
 
-INSERT INTO trainings (user_id, title, description)
-SELECT u.id, 'Medium spar', 'Rutina de sparring mediana (6 rounds)'
-FROM users u
-WHERE u.email IN ('diego@test.com', 'profe', 'alumno')
-  AND NOT EXISTS (
-    SELECT 1 FROM trainings t
-    WHERE t.user_id = u.id AND t.title = 'Medium spar'
-  );
+-- Catálogo: Medium spar
+INSERT INTO trainings (title, description)
+SELECT 'Medium spar', 'Rutina de sparring mediana (6 rounds)'
+WHERE NOT EXISTS (
+  SELECT 1 FROM trainings WHERE title = 'Medium spar'
+);
 
 INSERT INTO training_rounds (training_id, round_number, duration_seconds, rest_seconds, repetitions)
 SELECT t.id, 6, 120, 60, 0
 FROM trainings t
-INNER JOIN users u ON t.user_id = u.id
-WHERE u.email IN ('diego@test.com', 'profe', 'alumno') AND t.title = 'Medium spar'
+WHERE t.title = 'Medium spar'
   AND NOT EXISTS (
     SELECT 1 FROM training_rounds r WHERE r.training_id = t.id
   );
+
+-- Asignación a usuarios MVP
+INSERT OR IGNORE INTO users_trainings (user_id, training_id)
+SELECT u.id, t.id
+FROM users u
+CROSS JOIN trainings t
+WHERE u.email IN ('diego@test.com', 'profe', 'alumno')
+  AND t.title IN ('Light spar', 'Medium spar');

@@ -97,7 +97,7 @@ Or run both in one step:
 pnpm db:seed-all
 ```
 
-Verify:
+Verify (expect **3 catalog trainings** from `seed-all`; run HIIT seeds for the full set of 5):
 
 ```bash
 pnpm db:status
@@ -121,11 +121,14 @@ Open [http://localhost:3000](http://localhost:3000) and log in with one of the s
 | `pnpm lint` | ESLint |
 | `pnpm test` | Jest unit tests |
 | `pnpm db:init` | Create DB + schema |
+| `pnpm db:migrate-normalize` | Migrate legacy schema to normalized catalog + `users_trainings` |
 | `pnpm db:seed-users` | Insert authorized users from env |
 | `pnpm db:seed-trainings` | Insert sample routines (SQL seed) |
 | `pnpm db:seed-all` | Users + trainings in one run |
 | `pnpm db:status` | Print DB path, users, and routines |
-| `pnpm db:cleanup-orphan-trainings` | Remove routines with no owner |
+| `pnpm db:cleanup-orphan-trainings` | Remove catalog trainings with no user assignments |
+
+See [docs/database.md](./docs/database.md) for the normalized schema (`trainings` catalog + `users_trainings` assignments).
 
 See [docs/scripts.md](./docs/scripts.md) for what each script does in detail.
 
@@ -145,6 +148,8 @@ railway ssh -- node scripts/db-status.mjs
 railway ssh -- node scripts/seed-all.mjs
 ```
 
+After deploying the DB normalization refactor, the app migrates legacy schema on startup. **Re-seed inside the container** so the shared catalog and user assignments are repopulated.
+
 Full guide: [docs/railway-deployment.md](./docs/railway-deployment.md)
 
 **Important:** Use `railway ssh -- node scripts/...`, not `railway run`. Only SSH runs commands inside the container where `/data` is mounted.
@@ -162,6 +167,7 @@ Audit checklist: [docs/security-audit.md](./docs/security-audit.md)
 
 | Doc | Description |
 |-----|-------------|
+| [docs/database.md](./docs/database.md) | Normalized schema, ER diagram, migration notes |
 | [docs/scripts.md](./docs/scripts.md) | Database & maintenance scripts |
 | [docs/railway-deployment.md](./docs/railway-deployment.md) | Railway deploy, volume, env vars, seeds |
 | [docs/security-audit.md](./docs/security-audit.md) | Pre-launch security checklist |
