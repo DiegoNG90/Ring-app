@@ -133,7 +133,7 @@ describe('ActiveSegmentCard', () => {
         />,
       );
 
-      expect(screen.getByRole('button', { name: /empezar/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /^empezar$/i })).toBeInTheDocument();
     });
 
     it('calls onStart when started', async () => {
@@ -152,7 +152,7 @@ describe('ActiveSegmentCard', () => {
         />,
       );
 
-      await user.click(screen.getByRole('button', { name: /empezar/i }));
+      await user.click(screen.getByRole('button', { name: /^empezar$/i }));
 
       expect(onStart).toHaveBeenCalled();
     });
@@ -176,7 +176,7 @@ describe('ActiveSegmentCard', () => {
       await user.click(screen.getByRole('button', { name: /pausar/i }));
 
       expect(onPause).toHaveBeenCalled();
-      expect(screen.getByRole('button', { name: /reanudar/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /^reanudar$/i })).toBeInTheDocument();
     });
 
     it('resets the local timer on the first step', async () => {
@@ -220,7 +220,7 @@ describe('ActiveSegmentCard', () => {
         />,
       );
 
-      await user.click(screen.getByRole('button', { name: /empezar/i }));
+      await user.click(screen.getByRole('button', { name: /^empezar$/i }));
       await advanceTimer(2000);
 
       expect(onPreFinish).toHaveBeenCalled();
@@ -242,7 +242,7 @@ describe('ActiveSegmentCard', () => {
         />,
       );
 
-      await user.click(screen.getByRole('button', { name: /empezar/i }));
+      await user.click(screen.getByRole('button', { name: /^empezar$/i }));
       await advanceTimer(5000);
 
       expect(onPreFinish).not.toHaveBeenCalled();
@@ -264,7 +264,7 @@ describe('ActiveSegmentCard', () => {
         />,
       );
 
-      await user.click(screen.getByRole('button', { name: /empezar/i }));
+      await user.click(screen.getByRole('button', { name: /^empezar$/i }));
       await advanceTimer(2000);
 
       await waitFor(() => {

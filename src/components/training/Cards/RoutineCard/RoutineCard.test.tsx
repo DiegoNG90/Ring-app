@@ -87,7 +87,7 @@ describe('RoutineCard', () => {
         screen.getByRole('list', { name: /progreso de la rutina/i }),
       ).toBeInTheDocument();
       expect(
-        screen.getByRole('button', { name: /empezar/i }),
+        screen.getByRole('button', { name: /^empezar$/i }),
       ).toBeInTheDocument();
     });
   });
@@ -105,7 +105,7 @@ describe('RoutineCard', () => {
         />,
       );
 
-      await user.click(screen.getByRole('button', { name: /empezar/i }));
+      await user.click(screen.getByRole('button', { name: /^empezar$/i }));
 
       expect(mockPlay).toHaveBeenCalled();
       expect(getSoundSrc(0)).toBe('/sounds/boxing-bell-liviano.mp3');
@@ -126,7 +126,7 @@ describe('RoutineCard', () => {
         />,
       );
 
-      await user.click(screen.getByRole('button', { name: /empezar/i }));
+      await user.click(screen.getByRole('button', { name: /^empezar$/i }));
       mockPlay.mockClear();
       mockStop.mockClear();
 
@@ -134,7 +134,7 @@ describe('RoutineCard', () => {
 
       expect(mockStop).toHaveBeenCalled();
       expect(
-        screen.getByRole('button', { name: /reanudar/i }),
+        screen.getByRole('button', { name: /^reanudar$/i }),
       ).toBeInTheDocument();
     });
 
@@ -150,7 +150,7 @@ describe('RoutineCard', () => {
         />,
       );
 
-      await user.click(screen.getByRole('button', { name: /empezar/i }));
+      await user.click(screen.getByRole('button', { name: /^empezar$/i }));
       await advanceRoutineTimer(2000);
 
       await waitFor(() => {
@@ -162,7 +162,7 @@ describe('RoutineCard', () => {
       expect(screen.getByText(/Paso 1 de 3/)).toBeInTheDocument();
       expect(screen.getByText('Round 1/2')).toBeInTheDocument();
       expect(
-        screen.getByRole('button', { name: /empezar/i }),
+        screen.getByRole('button', { name: /^empezar$/i }),
       ).toBeInTheDocument();
       expect(getMainTimerInSegment('round')).toHaveTextContent('0:02');
     });
@@ -179,7 +179,7 @@ describe('RoutineCard', () => {
         />,
       );
 
-      await user.click(screen.getByRole('button', { name: /empezar/i }));
+      await user.click(screen.getByRole('button', { name: /^empezar$/i }));
       await advanceRoutineTimer(2000);
 
       await waitFor(() => {
@@ -200,7 +200,7 @@ describe('RoutineCard', () => {
       expect(screen.getByText(/Paso 1 de 3/)).toBeInTheDocument();
       expect(screen.getByText('Round 1/2')).toBeInTheDocument();
       expect(
-        screen.getByRole('button', { name: /empezar/i }),
+        screen.getByRole('button', { name: /^empezar$/i }),
       ).toBeInTheDocument();
     });
 
@@ -216,18 +216,18 @@ describe('RoutineCard', () => {
         />,
       );
 
-      await user.click(screen.getByRole('button', { name: /empezar/i }));
+      await user.click(screen.getByRole('button', { name: /^empezar$/i }));
       await user.click(screen.getByRole('button', { name: /pausar/i }));
       await user.click(screen.getByRole('button', { name: /reset/i }));
 
       expect(
-        screen.getByRole('button', { name: /empezar/i }),
+        screen.getByRole('button', { name: /^empezar$/i }),
       ).toBeInTheDocument();
 
       expect(getMainTimerInSegment('round')).toHaveTextContent('0:05');
 
       mockPlay.mockClear();
-      await user.click(screen.getByRole('button', { name: /empezar/i }));
+      await user.click(screen.getByRole('button', { name: /^empezar$/i }));
 
       expect(mockPlay).toHaveBeenCalled();
     });
@@ -244,7 +244,7 @@ describe('RoutineCard', () => {
         />,
       );
 
-      await user.click(screen.getByRole('button', { name: /empezar/i }));
+      await user.click(screen.getByRole('button', { name: /^empezar$/i }));
       await advanceRoutineTimer(1000);
 
       expect(getMainTimerInSegment('round')).toHaveTextContent('0:04');
@@ -254,7 +254,7 @@ describe('RoutineCard', () => {
 
       expect(getMainTimerInSegment('round')).toHaveTextContent('0:04');
 
-      await user.click(screen.getByRole('button', { name: /reanudar/i }));
+      await user.click(screen.getByRole('button', { name: /^reanudar$/i }));
       await advanceRoutineTimer(1000);
 
       expect(getMainTimerInSegment('round')).toHaveTextContent('0:03');
@@ -274,7 +274,7 @@ describe('RoutineCard', () => {
         />,
       );
 
-      await user.click(screen.getByRole('button', { name: /empezar/i }));
+      await user.click(screen.getByRole('button', { name: /^empezar$/i }));
       mockPlay.mockClear();
 
       await advanceRoutineTimer(2000);
@@ -295,7 +295,7 @@ describe('RoutineCard', () => {
         />,
       );
 
-      await user.click(screen.getByRole('button', { name: /empezar/i }));
+      await user.click(screen.getByRole('button', { name: /^empezar$/i }));
       await advanceRoutineTimer(2000);
 
       await waitFor(() => {
@@ -321,7 +321,7 @@ describe('RoutineCard', () => {
         />,
       );
 
-      await user.click(screen.getByRole('button', { name: /empezar/i }));
+      await user.click(screen.getByRole('button', { name: /^empezar$/i }));
       await advanceRoutineTimer(1000);
 
       await waitFor(() => {
@@ -341,7 +341,7 @@ describe('RoutineCard', () => {
         />,
       );
 
-      await user.click(screen.getByRole('button', { name: /empezar/i }));
+      await user.click(screen.getByRole('button', { name: /^empezar$/i }));
       await advanceRoutineTimer(1000);
 
       await waitFor(() => {
@@ -353,7 +353,7 @@ describe('RoutineCard', () => {
       await waitFor(() => {
         expect(screen.getByText(/Paso 1 de 1/)).toBeInTheDocument();
         expect(
-          screen.getByRole('button', { name: /empezar/i }),
+          screen.getByRole('button', { name: /^empezar$/i }),
         ).toBeInTheDocument();
       });
     });
@@ -370,7 +370,7 @@ describe('RoutineCard', () => {
         />,
       );
 
-      await user.click(screen.getByRole('button', { name: /empezar/i }));
+      await user.click(screen.getByRole('button', { name: /^empezar$/i }));
       mockPlay.mockClear();
 
       await advanceRoutineTimer(1000);
@@ -435,7 +435,7 @@ describe('RoutineCard', () => {
         />,
       );
 
-      await user.click(screen.getByRole('button', { name: /empezar/i }));
+      await user.click(screen.getByRole('button', { name: /^empezar$/i }));
       await advanceRoutineTimer(2000);
 
       await waitFor(() => {
@@ -477,7 +477,7 @@ describe('RoutineCard', () => {
         />,
       );
 
-      await user.click(screen.getByRole('button', { name: /empezar/i }));
+      await user.click(screen.getByRole('button', { name: /^empezar$/i }));
       await advanceRoutineTimer(1000);
 
       await waitFor(() => {
@@ -506,7 +506,7 @@ describe('RoutineCard', () => {
         screen.getByRole('button', { name: /pausar/i }),
       ).toBeInTheDocument();
       expect(
-        screen.queryByRole('button', { name: /empezar/i }),
+        screen.queryByRole('button', { name: /^empezar$/i }),
       ).not.toBeInTheDocument();
 
       await advanceRoutineTimer(1000);
@@ -522,7 +522,7 @@ describe('RoutineCard', () => {
       );
 
       expect(
-        screen.getByRole('button', { name: /empezar/i }),
+        screen.getByRole('button', { name: /^empezar$/i }),
       ).toBeInTheDocument();
       expect(mockPlay).not.toHaveBeenCalled();
     });
@@ -588,7 +588,7 @@ describe('RoutineCard', () => {
         />,
       );
 
-      await user.click(screen.getByRole('button', { name: /empezar/i }));
+      await user.click(screen.getByRole('button', { name: /^empezar$/i }));
       await advanceRoutineTimer(1000);
 
       await waitFor(() => {
@@ -641,7 +641,7 @@ describe('RoutineCard', () => {
         />,
       );
 
-      await user.click(screen.getByRole('button', { name: /empezar/i }));
+      await user.click(screen.getByRole('button', { name: /^empezar$/i }));
       mockPlay.mockClear();
 
       await advanceRoutineTimer(2000);
@@ -668,7 +668,7 @@ describe('RoutineCard', () => {
         />,
       );
 
-      await user.click(screen.getByRole('button', { name: /empezar/i }));
+      await user.click(screen.getByRole('button', { name: /^empezar$/i }));
       mockPlay.mockClear();
 
       await advanceRoutineTimer(20000);
@@ -690,7 +690,7 @@ describe('RoutineCard', () => {
         />,
       );
 
-      await user.click(screen.getByRole('button', { name: /empezar/i }));
+      await user.click(screen.getByRole('button', { name: /^empezar$/i }));
       await advanceRoutineTimer(8000);
 
       await waitFor(() => {
@@ -706,7 +706,7 @@ describe('RoutineCard', () => {
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       render(<RoutineCard training={createContinuousHiitTraining()} />);
 
-      await user.click(screen.getByRole('button', { name: /empezar/i }));
+      await user.click(screen.getByRole('button', { name: /^empezar$/i }));
       await advanceRoutineTimer(8000);
 
       await waitFor(() => {
@@ -730,7 +730,7 @@ describe('RoutineCard', () => {
 
       expect(screen.getByText(/Paso 1 de 7/)).toBeInTheDocument();
 
-      await user.click(screen.getByRole('button', { name: /empezar/i }));
+      await user.click(screen.getByRole('button', { name: /^empezar$/i }));
 
       await advanceRoutineTimer(8000);
       await waitFor(() => {
