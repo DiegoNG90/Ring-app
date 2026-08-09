@@ -37,7 +37,6 @@ export default function SegmentControls({
   type,
   hasStarted,
   cardKey,
-  isRunning,
   isPaused,
   preferredKeepScreenOn = true,
   screenLockActive = false,

@@ -155,5 +155,6 @@ La app abre en pantalla completa; los datos siguen viniendo del servidor (requie
 | DB vacía tras redeploy | Sin volumen o `DB_PATH` incorrecto | Montar volumen en `/data` y setear `DB_PATH=/data/training.db` |
 | Error al compilar `better-sqlite3` | Build sin dependencias nativas | Nixpacks + `pnpm.onlyBuiltDependencies` en `package.json` |
 | Login falla en prod | Cookie no segura / usuario inexistente / vars de seed faltantes / DB efímera | `NODE_ENV=production`, `DB_PATH=/data/training.db`, volumen `/data`, ejecutar `seed-all.mjs` vía SSH |
+| Build falla con `spawn yarn ENOENT` / TypeScript not found | `NODE_ENV=production` en Railway omite `devDependencies` en `pnpm install` | El `buildCommand` en `railway.toml` usa `pnpm install --config.production=false` para instalar TypeScript, Tailwind y ESLint durante el build |
 | Build falla en "Collecting page data" | `DB_PATH=/data/...` en build sin volumen | No poner `DB_PATH` en `nixpacks.toml`; solo en Variables de Railway en runtime |
 | App duerme | Free tier | Upgrade a Hobby o aceptar cold start |
