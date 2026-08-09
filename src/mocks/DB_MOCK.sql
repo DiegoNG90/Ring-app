@@ -1,3 +1,5 @@
+-- OBSOLETO: mock legacy estilo Postgres; no está conectado a scripts ni al esquema SQLite actual.
+-- Usar DB_SCHEMA.sqlite.sql y los archivos DB_SEED_*.sqlite.sql en su lugar.
 
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,

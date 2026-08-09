@@ -15,9 +15,10 @@ export function getAllTrainingsByUserId(userId: number): Training[] {
             tr.rest_seconds,
             tr.repetitions,
             tr.interval_seconds
-        FROM trainings t
+        FROM users_trainings ut
+        INNER JOIN trainings t ON t.id = ut.training_id
         INNER JOIN training_rounds tr ON t.id = tr.training_id  
-        WHERE t.user_id = ? 
+        WHERE ut.user_id = ? 
         ORDER BY t.id, tr.round_number;
       `,
     )
@@ -51,28 +52,23 @@ export function getTrainingById(id: number): Training | undefined {
   return result;
 }
 
+export function unlinkTrainingFromUser(
+  trainingId: number,
+  userId: number,
+): boolean {
+  const result = db
+    .prepare(
+      'DELETE FROM users_trainings WHERE user_id = ? AND training_id = ?',
+    )
+    .run(userId, trainingId);
+
+  return result.changes > 0;
+}
+
+/** @deprecated Use unlinkTrainingFromUser instead */
 export function deleteTrainingById(
   trainingId: number,
   userId: number,
 ): boolean {
-  const training = db
-    .prepare('SELECT id, user_id FROM trainings WHERE id = ?')
-    .get(trainingId) as { id: number; user_id: number } | undefined;
-
-  if (!training || training.user_id !== userId) {
-    return false;
-  }
-
-  const deleteRounds = db.prepare(
-    'DELETE FROM training_rounds WHERE training_id = ?',
-  );
-  const deleteTraining = db.prepare('DELETE FROM trainings WHERE id = ?');
-
-  const transaction = db.transaction(() => {
-    deleteRounds.run(trainingId);
-    deleteTraining.run(trainingId);
-  });
-
-  transaction();
-  return true;
+  return unlinkTrainingFromUser(trainingId, userId);
 }

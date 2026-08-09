@@ -20,6 +20,6 @@ if (!fs.existsSync(abs)) {
 }
 
 const content = fs.readFileSync(abs, 'utf8');
-const db = openDbWithSchema(dbPath);
+const { db } = openDbWithSchema(dbPath);
 db.exec(content);
 console.log('SQL ejecutado correctamente.');
