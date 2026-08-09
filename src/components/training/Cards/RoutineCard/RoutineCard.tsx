@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useKeepScreenOnPreference } from '@/hooks/useKeepScreenOnPreference';
 import type { Training } from '@/types/Trainings';
 import { Sound } from '@/lib/utils/sound';
 import ActiveSegmentCard from './components/ActiveSegmentCard/ActiveSegmentCard';
@@ -40,6 +41,7 @@ export default function RoutineCard({
 
   const [currentCard, setCurrentCard] = useState(0);
   const [hasStarted, setHasStarted] = useState(false);
+  const { keepScreenOn, setKeepScreenOn } = useKeepScreenOnPreference();
 
   const bellSound = useMemo(
     () => new Sound('/sounds/boxing-bell-liviano.mp3', 0.5),
@@ -171,6 +173,8 @@ export default function RoutineCard({
         onStart={handleStart}
         onReset={handleReset}
         onPause={handlePause}
+        keepScreenOn={keepScreenOn}
+        onKeepScreenOnChange={setKeepScreenOn}
       />
 
       <ProgressBar sequence={sequence} currentCard={currentCard} />

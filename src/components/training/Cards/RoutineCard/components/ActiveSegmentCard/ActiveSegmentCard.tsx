@@ -1,6 +1,7 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useWakeLock } from '@/hooks/useWakeLock';
 import type { Training } from '@/types/Trainings';
 import type { SegmentType } from '../../interfaces';
 import SegmentControls from './SegmentControls';
@@ -25,6 +26,8 @@ export interface ActiveSegmentCardProps {
   onStart?: () => void;
   onReset?: () => void;
   onPause?: () => void;
+  keepScreenOn?: boolean;
+  onKeepScreenOnChange?: (keepScreenOn: boolean) => void;
 }
 
 export default function ActiveSegmentCard({
@@ -40,6 +43,8 @@ export default function ActiveSegmentCard({
   onStart,
   onReset,
   onPause,
+  keepScreenOn = true,
+  onKeepScreenOnChange,
 }: ActiveSegmentCardProps) {
   const totalTime =
     type === 'round' ? training.duration_seconds : training.rest_seconds;
@@ -66,6 +71,15 @@ export default function ActiveSegmentCard({
     onReset,
     onPause,
   });
+
+  const { isActive: screenLockActive } = useWakeLock({
+    enabled: keepScreenOn && isRunning && !isPaused,
+  });
+
+  const handleStartOrResume = (withScreenOn: boolean) => {
+    onKeepScreenOnChange?.(withScreenOn);
+    toggleTimer();
+  };
 
   if (totalTime <= 0) {
     return (
@@ -124,7 +138,10 @@ export default function ActiveSegmentCard({
           cardKey={cardKey}
           isRunning={isRunning}
           isPaused={isPaused}
-          onToggle={toggleTimer}
+          preferredKeepScreenOn={keepScreenOn}
+          screenLockActive={screenLockActive}
+          onPause={toggleTimer}
+          onStartOrResume={handleStartOrResume}
           onReset={resetTimer}
         />
       </CardContent>

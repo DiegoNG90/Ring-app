@@ -17,7 +17,7 @@ jest.mock('@/lib/utils/sound', () => ({
 
 function getInteractiveStartButtons() {
   return screen
-    .getAllByRole('button', { name: /empezar/i })
+    .getAllByRole('button', { name: /^empezar$/i })
     .filter((btn) => !btn.closest('[aria-disabled="true"]'));
 }
 
