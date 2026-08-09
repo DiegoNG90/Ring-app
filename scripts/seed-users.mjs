@@ -56,7 +56,7 @@ function getAuthorizedUsersFromEnv() {
 }
 
 const authorizedUsers = getAuthorizedUsersFromEnv();
-const db = openDbWithSchema();
+const { db } = openDbWithSchema();
 const insert = db.prepare(
   'INSERT OR IGNORE INTO users (email, password) VALUES (?, ?)',
 );

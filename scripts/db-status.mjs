@@ -35,7 +35,13 @@ if (!exists) {
   process.exit(0);
 }
 
-const db = openDbWithSchema(dbPath);
+const { db, migrated } = openDbWithSchema(dbPath);
+
+if (migrated) {
+  console.log(
+    '\n⚠ Esquema legado detectado y migrado (trainings/training_rounds recreados). Corré pnpm db:seed-all para repoblar.',
+  );
+}
 
 const users = db.prepare('SELECT id, email FROM users ORDER BY id').all();
 console.log('\nUsuarios:', users.length);
@@ -43,22 +49,60 @@ for (const u of users) {
   console.log(`  - id=${u.id} email=${u.email}`);
 }
 
-const orphanTrainings = db
-  .prepare('SELECT COUNT(*) AS n FROM trainings WHERE user_id IS NULL')
+const catalogCount = db.prepare('SELECT COUNT(*) AS n FROM trainings').get().n;
+const assignmentCount = db
+  .prepare('SELECT COUNT(*) AS n FROM users_trainings')
   .get().n;
+const orphanCatalog = db
+  .prepare(
+    `SELECT COUNT(*) AS n FROM trainings t
+     WHERE NOT EXISTS (
+       SELECT 1 FROM users_trainings ut WHERE ut.training_id = t.id
+     )`,
+  )
+  .get().n;
+const brokenAssignments = db
+  .prepare(
+    `SELECT COUNT(*) AS n FROM users_trainings ut
+     WHERE NOT EXISTS (SELECT 1 FROM users u WHERE u.id = ut.user_id)
+        OR NOT EXISTS (SELECT 1 FROM trainings t WHERE t.id = ut.training_id)`,
+  )
+  .get().n;
+
+console.log('\nCatálogo (trainings):', catalogCount);
+console.log('Asignaciones (users_trainings):', assignmentCount);
+console.log(`  - trainings sin usuarios asignados: ${orphanCatalog}`);
+console.log(`  - asignaciones rotas (FK inválida): ${brokenAssignments}`);
+
 const trainings = db
   .prepare(
-    `SELECT t.id, t.title, t.user_id, u.email AS owner_email
+    `SELECT t.id, t.title,
+            (SELECT COUNT(*) FROM users_trainings ut WHERE ut.training_id = t.id) AS assigned_users
      FROM trainings t
-     LEFT JOIN users u ON u.id = t.user_id
      ORDER BY t.id`,
   )
   .all();
 
-console.log('\nTrainings:', trainings.length, `(huérfanos sin user_id: ${orphanTrainings})`);
 for (const t of trainings) {
   console.log(
-    `  - id=${t.id} title="${t.title}" user_id=${t.user_id ?? 'NULL'} owner=${t.owner_email ?? '—'}`,
+    `  - id=${t.id} title="${t.title}" usuarios_asignados=${t.assigned_users}`,
+  );
+}
+
+const assignments = db
+  .prepare(
+    `SELECT ut.id, ut.user_id, u.email, ut.training_id, t.title
+     FROM users_trainings ut
+     INNER JOIN users u ON u.id = ut.user_id
+     INNER JOIN trainings t ON t.id = ut.training_id
+     ORDER BY ut.user_id, ut.training_id`,
+  )
+  .all();
+
+console.log('\nAsignaciones por usuario:');
+for (const a of assignments) {
+  console.log(
+    `  - ut.id=${a.id} user=${a.email} (id=${a.user_id}) → "${a.title}" (training_id=${a.training_id})`,
   );
 }
 

@@ -16,14 +16,23 @@ CREATE TABLE IF NOT EXISTS sessions (
 
 CREATE TABLE IF NOT EXISTS trainings (
   id INTEGER PRIMARY KEY,
-  user_id INTEGER,
-  title TEXT,
+  title TEXT UNIQUE,
   description TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS users_trainings (
+  id INTEGER PRIMARY KEY,
+  user_id INTEGER NOT NULL,
+  training_id INTEGER NOT NULL,
   times_completed INTEGER DEFAULT 0,
+  last_completed_at TIMESTAMP,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  last_completed_at TIMESTAMP,
-  FOREIGN KEY (user_id) REFERENCES users(id)
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  FOREIGN KEY (training_id) REFERENCES trainings(id),
+  UNIQUE (user_id, training_id)
 );
 
 CREATE TABLE IF NOT EXISTS training_rounds (
