@@ -20,6 +20,7 @@ function createTraining(overrides: Partial<Training> = {}): Training {
     training_id: 1,
     training_title: 'Heavy Bag',
     training_description: 'Rutina de prueba',
+    training_type: 'SPARRING_2',
     round_id: 1,
     round_number: 2,
     duration_seconds: 12,

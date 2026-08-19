@@ -1,10 +1,22 @@
 import { render, screen } from '@testing-library/react';
-import { getTrainingById } from '@/lib/repositories/trainings';
+import { redirect } from 'next/navigation';
+import { verifyAuth } from '@/lib/auth/auth';
+import { getTrainingByIdForUser } from '@/lib/repositories/trainings';
 import type { Training } from '@/types/Trainings';
 import TrainingRutinePage from './page';
 
+jest.mock('next/navigation', () => ({
+  redirect: jest.fn((url: string) => {
+    throw new Error(`NEXT_REDIRECT:${url}`);
+  }),
+}));
+
+jest.mock('@/lib/auth/auth', () => ({
+  verifyAuth: jest.fn(),
+}));
+
 jest.mock('@/lib/repositories/trainings', () => ({
-  getTrainingById: jest.fn(),
+  getTrainingByIdForUser: jest.fn(),
 }));
 
 jest.mock('@/components/training/RepeatedRoutine', () => ({
@@ -27,6 +39,7 @@ const mockTraining: Training = {
   training_id: 42,
   training_title: 'Light Spar',
   training_description: 'Sparring liviano',
+  training_type: 'SPARRING_2',
   round_id: 10,
   round_number: 3,
   duration_seconds: 180,
@@ -45,6 +58,20 @@ async function renderTrainingDetailPage(slug: string) {
 describe('TrainingRutinePage (routine detail)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (verifyAuth as jest.Mock).mockResolvedValue({
+      user: { id: '7' },
+      session: { id: 'session-1' },
+    });
+  });
+
+  it('redirects to home if the user is not authenticated', async () => {
+    (verifyAuth as jest.Mock).mockResolvedValue({ user: null, session: null });
+
+    await expect(
+      TrainingRutinePage({ params: Promise.resolve({ slug: 'light-spar-42' }) }),
+    ).rejects.toThrow('NEXT_REDIRECT:/');
+
+    expect(redirect).toHaveBeenCalledWith('/');
   });
 
   describe('invalid slug', () => {
@@ -55,24 +82,24 @@ describe('TrainingRutinePage (routine detail)', () => {
       expect(
         screen.getByRole('link', { name: /volver al listado/i }),
       ).toHaveAttribute('href', '/training');
-      expect(getTrainingById).not.toHaveBeenCalled();
+      expect(getTrainingByIdForUser).not.toHaveBeenCalled();
     });
 
     it('shows error when the id is less than 1', async () => {
       await renderTrainingDetailPage('light-spar-0');
 
       expect(screen.getByText(/rutina no válida/i)).toBeInTheDocument();
-      expect(getTrainingById).not.toHaveBeenCalled();
+      expect(getTrainingByIdForUser).not.toHaveBeenCalled();
     });
   });
 
   describe('routine not found', () => {
     it('shows message and link back to the list', async () => {
-      (getTrainingById as jest.Mock).mockReturnValue(undefined);
+      (getTrainingByIdForUser as jest.Mock).mockReturnValue(undefined);
 
       await renderTrainingDetailPage('light-spar-99');
 
-      expect(getTrainingById).toHaveBeenCalledWith(99);
+      expect(getTrainingByIdForUser).toHaveBeenCalledWith(99, 7);
       expect(screen.getByText(/no se encontró la rutina/i)).toBeInTheDocument();
       expect(
         screen.getByRole('link', { name: /volver al listado/i }),
@@ -83,13 +110,13 @@ describe('TrainingRutinePage (routine detail)', () => {
 
   describe('valid detail', () => {
     beforeEach(() => {
-      (getTrainingById as jest.Mock).mockReturnValue(mockTraining);
+      (getTrainingByIdForUser as jest.Mock).mockReturnValue(mockTraining);
     });
 
-    it('fetches the routine by id extracted from the slug', async () => {
+    it('fetches the routine scoped to the authenticated user', async () => {
       await renderTrainingDetailPage('light-spar-42');
 
-      expect(getTrainingById).toHaveBeenCalledWith(42);
+      expect(getTrainingByIdForUser).toHaveBeenCalledWith(42, 7);
     });
 
     it('renders navigation and routine title', async () => {

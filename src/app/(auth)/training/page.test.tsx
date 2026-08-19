@@ -1,7 +1,10 @@
 import { render, screen } from '@testing-library/react';
 import { redirect } from 'next/navigation';
 import { verifyAuth } from '@/lib/auth/auth';
-import { getAllTrainingsByUserId } from '@/lib/repositories/trainings';
+import {
+  countUserCreatedRoutines,
+  getAllTrainingsByUserId,
+} from '@/lib/repositories/trainings';
 import type { Training } from '@/types/Trainings';
 import TrainingPage from './page';
 
@@ -17,6 +20,15 @@ jest.mock('@/lib/auth/auth', () => ({
 
 jest.mock('@/lib/repositories/trainings', () => ({
   getAllTrainingsByUserId: jest.fn(),
+  countUserCreatedRoutines: jest.fn(() => 0),
+}));
+
+jest.mock('@/components/training/CreateRoutine/CreateRoutineButton', () => ({
+  CreateRoutineButton: ({ userCreatedCount }: { userCreatedCount: number }) => (
+    <button type="button" data-user-created-count={userCreatedCount}>
+      Nueva rutina
+    </button>
+  ),
 }));
 
 jest.mock('@/components/training/TrainingRoutinesList', () => {
@@ -47,6 +59,7 @@ const mockTrainings: Training[] = [
     training_id: 1,
     training_title: 'Light Spar',
     training_description: 'Sparring liviano',
+    training_type: 'SPARRING_2',
     round_id: 10,
     round_number: 3,
     duration_seconds: 180,
@@ -58,6 +71,7 @@ const mockTrainings: Training[] = [
     training_id: 2,
     training_title: 'Heavy Bag',
     training_description: 'Sacos pesados',
+    training_type: 'SPARRING_3',
     round_id: 20,
     round_number: 5,
     duration_seconds: 120,
@@ -97,7 +111,7 @@ describe('TrainingPage', () => {
     expect(getAllTrainingsByUserId).toHaveBeenCalledWith(42);
   });
 
-  it('renders the disabled Nueva rutina button', async () => {
+  it('renders the enabled Nueva rutina button', async () => {
     (verifyAuth as jest.Mock).mockResolvedValue({
       user: { id: '1' },
       session: { id: 'session-1' },
@@ -106,7 +120,24 @@ describe('TrainingPage', () => {
 
     await renderTrainingPage();
 
-    expect(screen.getByRole('button', { name: /nueva rutina/i })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /nueva rutina/i })).toBeEnabled();
+  });
+
+  it('passes the user created routine count to the button', async () => {
+    (verifyAuth as jest.Mock).mockResolvedValue({
+      user: { id: '42' },
+      session: { id: 'session-1' },
+    });
+    (getAllTrainingsByUserId as jest.Mock).mockReturnValue(mockTrainings);
+    (countUserCreatedRoutines as jest.Mock).mockReturnValue(3);
+
+    await renderTrainingPage();
+
+    expect(countUserCreatedRoutines).toHaveBeenCalledWith(42);
+    expect(screen.getByRole('button', { name: /nueva rutina/i })).toHaveAttribute(
+      'data-user-created-count',
+      '3',
+    );
   });
 
   it('shows the training routines list when there are trainings', async () => {

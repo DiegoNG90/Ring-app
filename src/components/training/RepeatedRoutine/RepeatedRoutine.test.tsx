@@ -26,6 +26,7 @@ function createHiitTraining(overrides: Partial<Training> = {}): Training {
     training_id: 6,
     training_title: 'Functional 3 laps light',
     training_description: 'HIIT funcional, 3 vueltas',
+  training_type: 'HIIT',
     round_id: 1,
     round_number: 4,
     duration_seconds: 1,

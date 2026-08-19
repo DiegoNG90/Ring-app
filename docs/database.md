@@ -25,7 +25,8 @@ erDiagram
     }
     trainings {
         int id PK
-        text title UK
+        text title
+        text training_type
         text description
         timestamp created_at
         timestamp updated_at
@@ -36,6 +37,7 @@ erDiagram
         int training_id FK
         int times_completed
         timestamp last_completed_at
+        int is_user_created
         timestamp created_at
         timestamp updated_at
     }
@@ -62,11 +64,12 @@ Lucia auth sessions. Managed by `@lucia-auth/adapter-sqlite`.
 
 ### `trainings` (catalog)
 
-Shared routine definitions. **No `user_id`.** `title` is `UNIQUE` to prevent duplicate catalog entries.
+Shared routine definitions. **No `user_id`.** Uniqueness is enforced on `(title, training_type)` so the same name can exist with different routine types.
 
 | Column | Notes |
 |--------|-------|
-| `title` | Unique routine name (e.g. `Light spar`) |
+| `title` | Routine name (e.g. `Light spar`) |
+| `training_type` | One of `HIIT`, `HIIT_EXTENDED`, `SPARRING_2`, `SPARRING_3` |
 | `description` | Short description shown in the UI |
 
 Removed from this table (moved to `users_trainings`): `user_id`, `times_completed`, `last_completed_at`.
@@ -81,10 +84,15 @@ Many-to-many link between users and catalog routines, with per-user progress.
 | `training_id` | FK → `trainings(id)` |
 | `times_completed` | How many times this user completed the routine (default 0) |
 | `last_completed_at` | Last completion timestamp for this user |
+| `is_user_created` | `1` when the assignment came from the create-routine flow, `0` for seeded routines |
 
 `UNIQUE (user_id, training_id)` prevents duplicate assignments.
 
-**Delete behavior:** When a user removes a routine from their list (InfoCard delete), only the `users_trainings` row is removed. The catalog entry remains for other users.
+**Creation quota:** a user can hold at most `MAX_USER_CREATED_ROUTINES` (5) assignments with `is_user_created = 1`, enforced server-side in `createRoutineAction`. Seeded routines are free because they keep `is_user_created = 0`. Deleting a routine removes the row and frees the slot.
+
+**Delete behavior:** When a user removes a routine from their list (InfoCard delete), the `users_trainings` row is removed. If that was the **last** assignment for the routine, the catalog entry and its `training_rounds` are deleted in the same transaction, so the catalog cannot accumulate orphan rows through repeated create/delete cycles. While any other user still has the routine assigned, the catalog entry is preserved.
+
+Seeded routines follow the same rule: if every user removes one, it disappears from the catalog and comes back by re-running the corresponding seed (`pnpm db:seed-all`), which is idempotent.
 
 ### `training_rounds`
 
@@ -112,6 +120,7 @@ If an existing database has `trainings.user_id`, the app and scripts detect the 
 
 ```bash
 pnpm db:migrate-normalize   # optional explicit step (also runs on app startup)
+pnpm db:migrate-training-type
 pnpm db:seed-all
 pnpm db:status
 ```
@@ -129,7 +138,8 @@ railway ssh -- node scripts/db-status.mjs
 | Operation | Entry point | SQL path |
 |-----------|-------------|----------|
 | List user's routines | `getAllTrainingsByUserId` | `users_trainings` → `trainings` → `training_rounds` |
-| Routine detail | `getTrainingById` | `trainings` → `training_rounds` (no user filter yet) |
+| Routine detail | `getTrainingByIdForUser` | `users_trainings` → `trainings` → `training_rounds` (scoped to user) |
+| Create routine | `createRoutineAction` | Insert or link catalog entry + assign to user |
 | Remove from list | `unlinkTrainingFromUser` | `DELETE FROM users_trainings WHERE user_id = ? AND training_id = ?` |
 
 The UI type [`Training`](../src/types/Trainings.ts) is unchanged (flattened join shape).

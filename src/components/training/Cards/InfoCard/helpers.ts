@@ -1,4 +1,4 @@
-import { replaceBlankSpaceForHypen } from '@/lib/utils/strings';
+import { getTrainingHref as buildTrainingHref } from '@/lib/utils/strings';
 
 export function formatDuration(seconds: number): string {
   const mins = Math.floor(seconds / 60);
@@ -10,6 +10,5 @@ export function getTrainingHref(
   trainingId: number,
   trainingTitle: string,
 ): string {
-  const slug = replaceBlankSpaceForHypen(trainingTitle);
-  return `/training/${slug}-${trainingId}`;
+  return buildTrainingHref(trainingId, trainingTitle);
 }

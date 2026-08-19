@@ -36,6 +36,7 @@ const mockResult = {
   training_id: 42,
   training_title: 'Light Spar',
   training_description: 'Rutina corta de sparring',
+  training_type: 'SPARRING_2',
   round_id: 1,
   round_number: 3,
   duration_seconds: 125,

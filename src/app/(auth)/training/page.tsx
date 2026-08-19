@@ -1,10 +1,13 @@
 import React from 'react';
-import { Button } from '@/components/ui/button';
 import { verifyAuth } from '@/lib/auth/auth';
 import { redirect } from 'next/navigation';
-import { getAllTrainingsByUserId } from '@/lib/repositories/trainings';
+import {
+  countUserCreatedRoutines,
+  getAllTrainingsByUserId,
+} from '@/lib/repositories/trainings';
 
 import { Training } from '@/types/Trainings';
+import { CreateRoutineButton } from '@/components/training/CreateRoutine/CreateRoutineButton';
 import TrainingRoutinesList from '@/components/training/TrainingRoutinesList';
 
 export default async function TrainingPage() {
@@ -14,19 +17,14 @@ export default async function TrainingPage() {
     return redirect('/');
   }
 
-  const trainings: Training[] = getAllTrainingsByUserId(+result.user?.id);
+  const userId = +result.user?.id;
+  const trainings: Training[] = getAllTrainingsByUserId(userId);
+  const userCreatedCount = countUserCreatedRoutines(userId);
 
   return (
     <section>
       <div className="flex justify-end items-center p-3">
-        {/* FALTA LA FUNCIONALIDAD DE DESTE BOTTON! */}
-        <Button
-          variant="outline"
-          className="text-white align-center bg-teal-500 hover:bg-teal-300 hover:text-white cursor-pointer"
-          disabled // Sacar cuando esté la funcionalidad
-        >
-          Nueva rutina
-        </Button>
+        <CreateRoutineButton userCreatedCount={userCreatedCount} />
       </div>
 
       <TrainingRoutinesList trainings={trainings} />

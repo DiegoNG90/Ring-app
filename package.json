@@ -11,6 +11,7 @@
     "test:watch": "jest --watch",
     "db:init": "node scripts/init-db.mjs",
     "db:migrate-normalize": "node scripts/migrate-normalize-db.mjs",
+    "db:migrate-training-type": "node scripts/migrate-add-training-type.mjs",
     "db:seed-users": "node scripts/seed-users.mjs",
     "db:seed-trainings": "node scripts/run-sql-file.mjs src/mocks/DB_SEED_trainings.sqlite.sql",
     "db:seed-hiit": "node scripts/run-sql-file.mjs src/mocks/DB_SEED_hiit_trainings.sqlite.sql",
@@ -35,7 +36,8 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "shadcn": "^2.9.0",
-    "tailwind-merge": "^3.3.1"
+    "tailwind-merge": "^3.3.1",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

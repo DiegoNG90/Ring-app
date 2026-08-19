@@ -26,6 +26,7 @@ const mockTraining: Training = {
   training_id: 1,
   training_title: 'Light Spar',
   training_description: 'Sparring liviano',
+  training_type: 'SPARRING_2',
   round_id: 10,
   round_number: 3,
   duration_seconds: 180,
