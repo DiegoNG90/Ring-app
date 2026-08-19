@@ -89,6 +89,102 @@ export function migrateLegacySchema(db) {
   return true;
 }
 
+function ensureTrainingTypeColumn(db) {
+  const tableExists = db
+    .prepare(
+      "SELECT name FROM sqlite_master WHERE type='table' AND name='trainings'",
+    )
+    .get();
+
+  if (!tableExists) {
+    return false;
+  }
+
+  const columns = db.prepare('PRAGMA table_info(trainings)').all();
+  if (columns.some((col) => col.name === 'training_type')) {
+    db.exec(`
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_trainings_title_type
+      ON trainings (title, training_type);
+    `);
+    return false;
+  }
+
+  db.exec('PRAGMA foreign_keys = OFF');
+
+  const migrate = db.transaction(() => {
+    db.exec(`
+      CREATE TABLE trainings_new (
+        id INTEGER PRIMARY KEY,
+        title TEXT NOT NULL,
+        training_type TEXT NOT NULL DEFAULT 'HIIT',
+        description TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    db.exec(`
+      INSERT INTO trainings_new (id, title, training_type, description, created_at, updated_at)
+      SELECT
+        t.id,
+        t.title,
+        CASE
+          WHEN EXISTS (
+            SELECT 1 FROM training_rounds tr
+            WHERE tr.training_id = t.id AND tr.interval_seconds > 0
+          ) THEN 'HIIT_EXTENDED'
+          WHEN EXISTS (
+            SELECT 1 FROM training_rounds tr
+            WHERE tr.training_id = t.id AND tr.repetitions > 1
+          ) THEN 'HIIT'
+          WHEN EXISTS (
+            SELECT 1 FROM training_rounds tr
+            WHERE tr.training_id = t.id AND tr.duration_seconds = 120
+          ) THEN 'SPARRING_2'
+          WHEN EXISTS (
+            SELECT 1 FROM training_rounds tr
+            WHERE tr.training_id = t.id AND tr.duration_seconds = 180
+          ) THEN 'SPARRING_3'
+          ELSE 'HIIT'
+        END,
+        t.description,
+        t.created_at,
+        t.updated_at
+      FROM trainings t;
+    `);
+
+    db.exec('DROP TABLE trainings');
+    db.exec('ALTER TABLE trainings_new RENAME TO trainings');
+    db.exec(`
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_trainings_title_type
+      ON trainings (title, training_type);
+    `);
+  });
+
+  migrate();
+  db.exec('PRAGMA foreign_keys = ON');
+  return true;
+}
+
+function ensureIsUserCreatedColumn(db) {
+  const tableExists = db
+    .prepare(
+      "SELECT name FROM sqlite_master WHERE type='table' AND name='users_trainings'",
+    )
+    .get();
+
+  if (!tableExists) {
+    return;
+  }
+
+  const columns = db.prepare('PRAGMA table_info(users_trainings)').all();
+  if (!columns.some((col) => col.name === 'is_user_created')) {
+    db.exec(
+      'ALTER TABLE users_trainings ADD COLUMN is_user_created INTEGER NOT NULL DEFAULT 0',
+    );
+  }
+}
+
 function ensureIntervalSecondsColumn(db) {
   const tableExists = db
     .prepare(
@@ -114,5 +210,7 @@ export function openDbWithSchema(dbPath = getDbPath()) {
   const migrated = migrateLegacySchema(db);
   db.exec(fs.readFileSync(schemaPath, 'utf8'));
   ensureIntervalSecondsColumn(db);
-  return { db, migrated };
+  const trainingTypeMigrated = ensureTrainingTypeColumn(db);
+  ensureIsUserCreatedColumn(db);
+  return { db, migrated: migrated || trainingTypeMigrated };
 }

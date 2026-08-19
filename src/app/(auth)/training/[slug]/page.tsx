@@ -2,14 +2,22 @@ import React from 'react';
 import Link from 'next/link';
 
 import RepeatedRoutine from '@/components/training/RepeatedRoutine';
-import { getTrainingById } from '@/lib/repositories/trainings';
+import { verifyAuth } from '@/lib/auth/auth';
+import { getTrainingByIdForUser } from '@/lib/repositories/trainings';
 import { capitalize, normalizeUrlSlug } from '@/lib/utils/strings';
+import { redirect } from 'next/navigation';
 
 interface TrainingRutinePageProps {
   params: Promise<{ slug: string }>;
 }
 
 async function TrainingRutinePage({ params }: TrainingRutinePageProps) {
+  const result = await verifyAuth();
+
+  if (!result.user) {
+    redirect('/');
+  }
+
   const { slug } = await params;
 
   const parsedUrlSlug = normalizeUrlSlug(slug);
@@ -30,7 +38,7 @@ async function TrainingRutinePage({ params }: TrainingRutinePageProps) {
     );
   }
 
-  const training = getTrainingById(trainingId);
+  const training = getTrainingByIdForUser(trainingId, Number(result.user.id));
 
   if (!training) {
     return (

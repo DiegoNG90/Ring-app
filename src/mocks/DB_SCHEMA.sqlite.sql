@@ -16,11 +16,15 @@ CREATE TABLE IF NOT EXISTS sessions (
 
 CREATE TABLE IF NOT EXISTS trainings (
   id INTEGER PRIMARY KEY,
-  title TEXT UNIQUE,
+  title TEXT NOT NULL,
+  training_type TEXT NOT NULL DEFAULT 'HIIT',
   description TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_trainings_title_type
+  ON trainings (title, training_type);
 
 CREATE TABLE IF NOT EXISTS users_trainings (
   id INTEGER PRIMARY KEY,
@@ -28,6 +32,7 @@ CREATE TABLE IF NOT EXISTS users_trainings (
   training_id INTEGER NOT NULL,
   times_completed INTEGER DEFAULT 0,
   last_completed_at TIMESTAMP,
+  is_user_created INTEGER NOT NULL DEFAULT 0,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id),

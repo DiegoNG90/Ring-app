@@ -10,6 +10,21 @@ export function replaceBlankSpaceForHypen(sentence: string) {
   return sentence.replaceAll(' ', '-').toLowerCase();
 }
 
+export function slugifyTrainingTitle(title: string): string {
+  return title
+    .normalize('NFC')
+    .trim()
+    .toLowerCase()
+    .replace(/[\s:]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+export function getTrainingHref(trainingId: number, trainingTitle: string): string {
+  const slug = slugifyTrainingTitle(trainingTitle);
+  return `/training/${slug}-${trainingId}`;
+}
+
 export function normalizeUrlSlug(slug: string) {
   const arrStr = slug.split('-');
   arrStr.pop();
