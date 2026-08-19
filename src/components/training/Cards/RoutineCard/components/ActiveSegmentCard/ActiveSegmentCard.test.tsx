@@ -118,6 +118,25 @@ describe('ActiveSegmentCard', () => {
       expect(screen.getByText('Descanso próximo')).toBeInTheDocument();
       expect(screen.getByText('—')).toBeInTheDocument();
     });
+
+    it('hides segment stats and training subtitle when expanded', () => {
+      render(
+        <ActiveSegmentCard
+          training={training}
+          type="round"
+          currentRound={1}
+          totalRounds={2}
+          cardKey={0}
+          hasStarted={true}
+          isExpanded
+        />,
+      );
+
+      expect(screen.getByText('Round 1/2')).toBeInTheDocument();
+      expect(screen.queryByText('Heavy Bag')).not.toBeInTheDocument();
+      expect(screen.queryByText('Este round')).not.toBeInTheDocument();
+      expect(document.querySelector('.text-5xl')).toBeInTheDocument();
+    });
   });
 
   describe('timer controls', () => {

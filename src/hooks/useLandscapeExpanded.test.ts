@@ -98,8 +98,39 @@ describe('useLandscapeExpanded', () => {
     expect(result.current.isExpanded).toBe(false);
 
     act(() => {
+      result.current.expand();
+    });
+
+    expect(result.current.isExpanded).toBe(true);
+
+    act(() => {
       media.setLandscape(false);
     });
+
+    act(() => {
+      media.setLandscape(true);
+    });
+
+    await waitFor(() => {
+      expect(result.current.isExpanded).toBe(true);
+    });
+  });
+
+  it('resets expansion preference when the routine stops', async () => {
+    const { result, rerender } = renderHook(
+      ({ hasStarted }) => useLandscapeExpanded({ hasStarted }),
+      { initialProps: { hasStarted: true } },
+    );
+
+    act(() => {
+      media.setLandscape(true);
+      result.current.dismiss();
+    });
+
+    expect(result.current.isExpanded).toBe(false);
+
+    rerender({ hasStarted: false });
+    rerender({ hasStarted: true });
 
     act(() => {
       media.setLandscape(true);
