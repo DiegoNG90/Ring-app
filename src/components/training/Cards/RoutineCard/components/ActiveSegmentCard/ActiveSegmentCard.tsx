@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useWakeLock } from '@/hooks/useWakeLock';
+import { cn } from '@/lib/helpers/tailwind-styles';
 import type { Training } from '@/types/Trainings';
 import type { SegmentType } from '../../interfaces';
 import SegmentControls from './SegmentControls';
@@ -120,9 +121,12 @@ export default function ActiveSegmentCard({
         trainingTitle={training.training_title}
         currentRound={currentRound}
         totalRounds={totalRounds}
+        isExpanded={isExpanded}
       />
 
-      <CardContent className="text-center space-y-4">
+      <CardContent
+        className={cn('text-center', isExpanded ? 'space-y-2' : 'space-y-4')}
+      >
         <SegmentTimer
           type={type}
           timeLeft={timeLeft}
@@ -131,11 +135,13 @@ export default function ActiveSegmentCard({
           isExpanded={isExpanded}
         />
 
-        <SegmentStats
-          type={type}
-          durationSeconds={training.duration_seconds}
-          restSeconds={training.rest_seconds}
-        />
+        {!isExpanded && (
+          <SegmentStats
+            type={type}
+            durationSeconds={training.duration_seconds}
+            restSeconds={training.rest_seconds}
+          />
+        )}
 
         <SegmentControls
           type={type}

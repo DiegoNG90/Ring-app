@@ -40,6 +40,25 @@ export default function InstallPrompt() {
   const [isStandalone, setIsStandalone] = useState(false);
   const [showIosHint, setShowIosHint] = useState(false);
   const [isInstalling, setIsInstalling] = useState(false);
+  const [isTrainingExpanded, setIsTrainingExpanded] = useState(false);
+
+  useEffect(() => {
+    const syncTrainingExpanded = () => {
+      setIsTrainingExpanded(
+        document.body.dataset.trainingExpanded === 'true',
+      );
+    };
+
+    syncTrainingExpanded();
+
+    const observer = new MutationObserver(syncTrainingExpanded);
+    observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: ['data-training-expanded'],
+    });
+
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     setIsStandalone(isStandaloneMode());
@@ -98,7 +117,7 @@ export default function InstallPrompt() {
     setShowIosHint(false);
   };
 
-  if (isStandalone) {
+  if (isStandalone || isTrainingExpanded) {
     return null;
   }
 

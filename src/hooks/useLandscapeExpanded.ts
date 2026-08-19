@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useViewportOrientation } from './useViewportOrientation';
 
+type ExpansionPreference = 'auto' | 'expanded' | 'collapsed';
+
 export interface UseLandscapeExpandedOptions {
   hasStarted: boolean;
   disabled?: boolean;
@@ -12,6 +14,7 @@ export interface UseLandscapeExpandedOptions {
 export interface UseLandscapeExpandedResult {
   isExpanded: boolean;
   isLandscape: boolean;
+  expand: () => void;
   dismiss: () => void;
 }
 
@@ -21,24 +24,33 @@ export function useLandscapeExpanded({
   isFinished = false,
 }: UseLandscapeExpandedOptions): UseLandscapeExpandedResult {
   const isLandscape = useViewportOrientation();
-  const [dismissedWhileLandscape, setDismissedWhileLandscape] = useState(false);
+  const [preference, setPreference] = useState<ExpansionPreference>('auto');
 
   useEffect(() => {
     if (!isLandscape) {
-      setDismissedWhileLandscape(false);
+      setPreference('auto');
     }
   }, [isLandscape]);
 
-  const dismiss = useCallback(() => {
-    setDismissedWhileLandscape(true);
+  useEffect(() => {
+    if (!hasStarted) {
+      setPreference('auto');
+    }
+  }, [hasStarted]);
+
+  const expand = useCallback(() => {
+    setPreference('expanded');
   }, []);
 
-  const isExpanded =
-    isLandscape &&
-    hasStarted &&
-    !disabled &&
-    !isFinished &&
-    !dismissedWhileLandscape;
+  const dismiss = useCallback(() => {
+    setPreference('collapsed');
+  }, []);
 
-  return { isExpanded, isLandscape, dismiss };
+  const canExpand = hasStarted && !disabled && !isFinished;
+
+  const isExpanded =
+    canExpand &&
+    (preference === 'expanded' || (preference === 'auto' && isLandscape));
+
+  return { isExpanded, isLandscape, expand, dismiss };
 }
