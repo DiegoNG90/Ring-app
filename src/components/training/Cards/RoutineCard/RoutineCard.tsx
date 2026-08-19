@@ -1,7 +1,11 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Minimize2 } from 'lucide-react';
+import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 import { useKeepScreenOnPreference } from '@/hooks/useKeepScreenOnPreference';
+import { useLandscapeExpanded } from '@/hooks/useLandscapeExpanded';
+import { cn } from '@/lib/helpers/tailwind-styles';
 import type { Training } from '@/types/Trainings';
 import { Sound } from '@/lib/utils/sound';
 import ActiveSegmentCard from './components/ActiveSegmentCard/ActiveSegmentCard';
@@ -92,6 +96,14 @@ export default function RoutineCard({
 
   const isFinished = sequence.length > 0 && currentCard >= sequence.length;
 
+  const { isExpanded, dismiss } = useLandscapeExpanded({
+    hasStarted,
+    disabled,
+    isFinished,
+  });
+
+  useBodyScrollLock(isExpanded);
+
   useEffect(() => {
     if (!disabled) return;
     stopAllSounds();
@@ -175,6 +187,7 @@ export default function RoutineCard({
         onPause={handlePause}
         keepScreenOn={keepScreenOn}
         onKeepScreenOnChange={setKeepScreenOn}
+        isExpanded={isExpanded}
       />
 
       <ProgressBar sequence={sequence} currentCard={currentCard} />
@@ -192,7 +205,28 @@ export default function RoutineCard({
     );
   }
 
-  return content;
+  return (
+    <div
+      className={cn(
+        isExpanded &&
+          'fixed inset-0 z-50 flex min-h-dvh flex-col justify-center overflow-y-auto bg-zinc-950 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(3.5rem,env(safe-area-inset-top))] motion-safe:transition-[background-color] motion-safe:duration-300',
+      )}
+      data-landscape-expanded={isExpanded ? 'true' : undefined}
+    >
+      {isExpanded && (
+        <button
+          type="button"
+          onClick={dismiss}
+          className="absolute right-[max(1rem,env(safe-area-inset-right))] top-[max(1rem,env(safe-area-inset-top))] z-10 inline-flex items-center gap-2 rounded-md border border-zinc-700 bg-zinc-900/90 px-3 py-2 text-sm text-zinc-200 hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
+          aria-label="Salir de pantalla completa"
+        >
+          <Minimize2 className="h-4 w-4" aria-hidden="true" />
+          <span className="sr-only sm:not-sr-only">Salir</span>
+        </button>
+      )}
+      {content}
+    </div>
+  );
 }
 
 export { buildRoutineSegments } from './helpers';

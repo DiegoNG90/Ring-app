@@ -28,6 +28,7 @@ export interface ActiveSegmentCardProps {
   onPause?: () => void;
   keepScreenOn?: boolean;
   onKeepScreenOnChange?: (keepScreenOn: boolean) => void;
+  isExpanded?: boolean;
 }
 
 export default function ActiveSegmentCard({
@@ -45,6 +46,7 @@ export default function ActiveSegmentCard({
   onPause,
   keepScreenOn = true,
   onKeepScreenOnChange,
+  isExpanded = false,
 }: ActiveSegmentCardProps) {
   const totalTime =
     type === 'round' ? training.duration_seconds : training.rest_seconds;
@@ -105,7 +107,9 @@ export default function ActiveSegmentCard({
 
   return (
     <Card
-      className={`w-full max-w-sm mx-auto transition-colors duration-300 shadow-lg ${
+      className={`w-full mx-auto transition-colors duration-300 shadow-lg ${
+        isExpanded ? 'max-w-none' : 'max-w-sm'
+      } ${
         type === 'round' ? surfaceRound : surfaceRest
       } ${isCompleted ? 'opacity-90' : ''}`}
       data-segment-type={type}
@@ -124,6 +128,7 @@ export default function ActiveSegmentCard({
           timeLeft={timeLeft}
           progress={progress}
           isCompleted={isCompleted}
+          isExpanded={isExpanded}
         />
 
         <SegmentStats

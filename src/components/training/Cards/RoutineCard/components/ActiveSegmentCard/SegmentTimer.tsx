@@ -6,6 +6,7 @@ interface SegmentTimerProps {
   timeLeft: number;
   progress: number;
   isCompleted: boolean;
+  isExpanded?: boolean;
 }
 
 export default function SegmentTimer({
@@ -13,11 +14,14 @@ export default function SegmentTimer({
   timeLeft,
   progress,
   isCompleted,
+  isExpanded = false,
 }: SegmentTimerProps) {
   return (
     <div className="relative">
       <div
-        className={`text-4xl font-mono font-bold tabular-nums ${
+        className={`font-mono font-bold tabular-nums ${
+          isExpanded ? 'text-6xl sm:text-7xl' : 'text-4xl'
+        } ${
           isCompleted
             ? 'text-zinc-500'
             : type === 'round'
@@ -28,9 +32,11 @@ export default function SegmentTimer({
         {formatTime(timeLeft)}
       </div>
 
-      <div className="mt-3 w-full bg-zinc-700/80 rounded-full h-2">
+      <div className={`mt-3 w-full bg-zinc-700/80 rounded-full ${isExpanded ? 'h-3' : 'h-2'}`}>
         <div
-          className={`h-2 rounded-full transition-all duration-500 ${
+          className={`rounded-full transition-all duration-500 ${
+            isExpanded ? 'h-3' : 'h-2'
+          } ${
             type === 'round' ? 'bg-emerald-500' : 'bg-orange-500'
           }`}
           style={{ width: `${Math.min(100, progress)}%` }}
