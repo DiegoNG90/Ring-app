@@ -90,5 +90,25 @@ export function useWakeLock({ enabled }: UseWakeLockOptions): UseWakeLockResult 
     };
   }, [acquire]);
 
+  useEffect(() => {
+    const handleOrientationChange = () => {
+      if (!enabledRef.current || document.visibilityState !== 'visible') return;
+
+      sentinelRef.current = null;
+      setIsActive(false);
+      void acquire();
+    };
+
+    window.addEventListener('orientationchange', handleOrientationChange);
+
+    const screenOrientation = window.screen?.orientation;
+    screenOrientation?.addEventListener('change', handleOrientationChange);
+
+    return () => {
+      window.removeEventListener('orientationchange', handleOrientationChange);
+      screenOrientation?.removeEventListener('change', handleOrientationChange);
+    };
+  }, [acquire]);
+
   return { isSupported, isActive };
 }

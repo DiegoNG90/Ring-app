@@ -109,4 +109,20 @@ describe('useWakeLock', () => {
     expect(result.current.isSupported).toBe(false);
     expect(result.current.isActive).toBe(false);
   });
+
+  it('re-acquires the wake lock after orientation changes', async () => {
+    renderHook(() => useWakeLock({ enabled: true }));
+
+    await waitFor(() => {
+      expect(requestMock).toHaveBeenCalledTimes(1);
+    });
+
+    act(() => {
+      window.dispatchEvent(new Event('orientationchange'));
+    });
+
+    await waitFor(() => {
+      expect(requestMock).toHaveBeenCalledTimes(2);
+    });
+  });
 });

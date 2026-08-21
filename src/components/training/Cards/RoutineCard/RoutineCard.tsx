@@ -1,7 +1,11 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Maximize2, Minimize2 } from 'lucide-react';
+import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 import { useKeepScreenOnPreference } from '@/hooks/useKeepScreenOnPreference';
+import { useLandscapeExpanded } from '@/hooks/useLandscapeExpanded';
+import { cn } from '@/lib/helpers/tailwind-styles';
 import type { Training } from '@/types/Trainings';
 import { Sound } from '@/lib/utils/sound';
 import ActiveSegmentCard from './components/ActiveSegmentCard/ActiveSegmentCard';
@@ -92,6 +96,17 @@ export default function RoutineCard({
 
   const isFinished = sequence.length > 0 && currentCard >= sequence.length;
 
+  const { isExpanded, expand, dismiss } = useLandscapeExpanded({
+    hasStarted,
+    disabled,
+    isFinished,
+  });
+
+  const fullscreenToggleClassName =
+    'inline-flex items-center gap-2 rounded-md border border-zinc-700 bg-zinc-900/90 px-3 py-2 text-sm text-zinc-200 hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500';
+
+  useBodyScrollLock(isExpanded);
+
   useEffect(() => {
     if (!disabled) return;
     stopAllSounds();
@@ -152,12 +167,19 @@ export default function RoutineCard({
   if (!active) return null;
 
   const content = (
-    <div className="space-y-6">
-      <RoutineProgress
-        sequence={sequence}
-        currentCard={currentCard}
-        cycleNumber={cycleNumber}
-      />
+    <div
+      className={cn(
+        hasStarted && !isExpanded && 'pr-12',
+        isExpanded ? 'space-y-3' : 'space-y-6',
+      )}
+    >
+      {!isExpanded && (
+        <RoutineProgress
+          sequence={sequence}
+          currentCard={currentCard}
+          cycleNumber={cycleNumber}
+        />
+      )}
 
       <ActiveSegmentCard
         key={`${active.type}-${active.round}-${currentCard}`}
@@ -175,9 +197,12 @@ export default function RoutineCard({
         onPause={handlePause}
         keepScreenOn={keepScreenOn}
         onKeepScreenOnChange={setKeepScreenOn}
+        isExpanded={isExpanded}
       />
 
-      <ProgressBar sequence={sequence} currentCard={currentCard} />
+      {!isExpanded && (
+        <ProgressBar sequence={sequence} currentCard={currentCard} />
+      )}
     </div>
   );
 
@@ -192,7 +217,54 @@ export default function RoutineCard({
     );
   }
 
-  return content;
+  return (
+    <div
+      className={cn(
+        'relative',
+        isExpanded &&
+          'fixed inset-0 z-[60] flex min-h-dvh flex-col overflow-hidden bg-zinc-950 motion-safe:transition-[background-color] motion-safe:duration-300',
+      )}
+      data-landscape-expanded={isExpanded ? 'true' : undefined}
+    >
+      {hasStarted && (
+        <div
+          className={cn(
+            'z-10 flex justify-end',
+            isExpanded
+              ? 'shrink-0 px-4 pb-2 pt-[max(0.75rem,env(safe-area-inset-top))]'
+              : 'absolute right-0 top-0',
+          )}
+        >
+          <button
+            type="button"
+            onClick={isExpanded ? dismiss : expand}
+            className={fullscreenToggleClassName}
+            aria-label={
+              isExpanded ? 'Salir de pantalla completa' : 'Pantalla completa'
+            }
+          >
+            {isExpanded ? (
+              <>
+                <Minimize2 className="h-4 w-4" aria-hidden="true" />
+                <span className="sr-only sm:not-sr-only">Salir</span>
+              </>
+            ) : (
+              <Maximize2 className="h-4 w-4" aria-hidden="true" />
+            )}
+          </button>
+        </div>
+      )}
+
+      <div
+        className={cn(
+          isExpanded &&
+            'flex min-h-0 flex-1 flex-col justify-center overflow-hidden px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))]',
+        )}
+      >
+        {content}
+      </div>
+    </div>
+  );
 }
 
 export { buildRoutineSegments } from './helpers';

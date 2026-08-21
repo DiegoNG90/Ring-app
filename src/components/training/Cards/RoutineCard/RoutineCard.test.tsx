@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import RoutineCard from './RoutineCard';
 import type { Training } from '@/types/Trainings';
 import { Sound } from '@/lib/utils/sound';
+import { mockMatchMedia } from '@/test-helpers/mockMatchMedia';
 
 const mockPlay = jest.fn();
 const mockStop = jest.fn();
@@ -49,7 +50,7 @@ function getMainTimerInSegment(segmentType: 'round' | 'rest') {
 
   expect(segment).not.toBeNull();
 
-  const timer = segment!.querySelector('.text-4xl');
+  const timer = segment!.querySelector('.tabular-nums');
   expect(timer).not.toBeNull();
 
   return timer as HTMLElement;
@@ -778,6 +779,281 @@ describe('RoutineCard', () => {
       expect(
         screen.queryByText(/Descanso · después del round 4/i),
       ).not.toBeInTheDocument();
+    });
+  });
+
+  describe('landscape expansion', () => {
+    let media: ReturnType<typeof mockMatchMedia>;
+
+    beforeEach(() => {
+      media = mockMatchMedia(false);
+    });
+
+    afterEach(() => {
+      media.restore();
+      document.body.style.overflow = '';
+    });
+
+    it('does not expand in landscape before the routine starts', () => {
+      render(
+        <RoutineCard
+          training={createTraining({
+            round_number: 1,
+            rest_seconds: 0,
+            duration_seconds: 5,
+          })}
+        />,
+      );
+
+      act(() => {
+        media.setLandscape(true);
+      });
+
+      expect(
+        document.querySelector('[data-landscape-expanded="true"]'),
+      ).toBeNull();
+    });
+
+    it('expands in landscape after starting the routine', async () => {
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      render(
+        <RoutineCard
+          training={createTraining({
+            round_number: 1,
+            rest_seconds: 0,
+            duration_seconds: 5,
+          })}
+        />,
+      );
+
+      await user.click(screen.getByRole('button', { name: /^empezar$/i }));
+
+      act(() => {
+        media.setLandscape(true);
+      });
+
+      await waitFor(() => {
+        expect(
+          document.querySelector('[data-landscape-expanded="true"]'),
+        ).toBeInTheDocument();
+      });
+
+      expect(
+        screen.getByRole('button', { name: /salir de pantalla completa/i }),
+      ).toBeInTheDocument();
+    });
+
+    it('shows expand button after dismiss and re-expands on click', async () => {
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      render(
+        <RoutineCard
+          training={createTraining({
+            round_number: 1,
+            rest_seconds: 0,
+            duration_seconds: 5,
+          })}
+        />,
+      );
+
+      await user.click(screen.getByRole('button', { name: /^empezar$/i }));
+
+      act(() => {
+        media.setLandscape(true);
+      });
+
+      await waitFor(() => {
+        expect(
+          document.querySelector('[data-landscape-expanded="true"]'),
+        ).toBeInTheDocument();
+      });
+
+      await user.click(
+        screen.getByRole('button', { name: /salir de pantalla completa/i }),
+      );
+
+      expect(
+        document.querySelector('[data-landscape-expanded="true"]'),
+      ).toBeNull();
+
+      await user.click(
+        screen.getByRole('button', { name: /^pantalla completa$/i }),
+      );
+
+      await waitFor(() => {
+        expect(
+          document.querySelector('[data-landscape-expanded="true"]'),
+        ).toBeInTheDocument();
+      });
+    });
+
+    it('hides routine progress labels while expanded and keeps segment context', async () => {
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      render(
+        <RoutineCard
+          training={createTraining({
+            round_number: 2,
+            rest_seconds: 5,
+            duration_seconds: 5,
+          })}
+        />,
+      );
+
+      await user.click(screen.getByRole('button', { name: /^empezar$/i }));
+
+      expect(screen.getByText('Round 1')).toBeInTheDocument();
+      expect(screen.getByText(/Paso 1 de 3/)).toBeInTheDocument();
+
+      act(() => {
+        media.setLandscape(true);
+      });
+
+      await waitFor(() => {
+        expect(
+          document.querySelector('[data-landscape-expanded="true"]'),
+        ).toBeInTheDocument();
+      });
+
+      expect(screen.queryByText(/^Round 1$/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/Paso 1 de 3/)).not.toBeInTheDocument();
+      expect(screen.getByText('Round 1/2')).toBeInTheDocument();
+      expect(
+        screen.queryByRole('list', { name: /progreso de la rutina/i }),
+      ).not.toBeInTheDocument();
+    });
+
+    it('uses a non-scrollable overlay and marks body training expanded', async () => {
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      render(
+        <RoutineCard
+          training={createTraining({
+            round_number: 1,
+            rest_seconds: 5,
+            duration_seconds: 5,
+          })}
+        />,
+      );
+
+      await user.click(screen.getByRole('button', { name: /^empezar$/i }));
+
+      act(() => {
+        media.setLandscape(true);
+      });
+
+      await waitFor(() => {
+        expect(document.body.dataset.trainingExpanded).toBe('true');
+      });
+
+      const overlay = document.querySelector('[data-landscape-expanded="true"]');
+      expect(overlay).toHaveClass('overflow-hidden');
+      expect(screen.queryByText('Este round')).not.toBeInTheDocument();
+    });
+
+    it('preserves timer value when toggling landscape orientation', async () => {
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      render(
+        <RoutineCard
+          training={createTraining({
+            round_number: 1,
+            rest_seconds: 0,
+            duration_seconds: 5,
+          })}
+        />,
+      );
+
+      await user.click(screen.getByRole('button', { name: /^empezar$/i }));
+      await advanceRoutineTimer(1000);
+
+      expect(getMainTimerInSegment('round')).toHaveTextContent('0:04');
+
+      act(() => {
+        media.setLandscape(true);
+      });
+
+      await waitFor(() => {
+        expect(
+          document.querySelector('[data-landscape-expanded="true"]'),
+        ).toBeInTheDocument();
+      });
+
+      expect(getMainTimerInSegment('round')).toHaveTextContent('0:04');
+
+      act(() => {
+        media.setLandscape(false);
+      });
+
+      await waitFor(() => {
+        expect(
+          document.querySelector('[data-landscape-expanded="true"]'),
+        ).toBeNull();
+      });
+
+      expect(getMainTimerInSegment('round')).toHaveTextContent('0:04');
+    });
+
+    it('allows manual dismiss without resetting the timer', async () => {
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      render(
+        <RoutineCard
+          training={createTraining({
+            round_number: 1,
+            rest_seconds: 0,
+            duration_seconds: 5,
+          })}
+        />,
+      );
+
+      await user.click(screen.getByRole('button', { name: /^empezar$/i }));
+
+      act(() => {
+        media.setLandscape(true);
+      });
+
+      await waitFor(() => {
+        expect(
+          document.querySelector('[data-landscape-expanded="true"]'),
+        ).toBeInTheDocument();
+      });
+
+      await user.click(
+        screen.getByRole('button', { name: /salir de pantalla completa/i }),
+      );
+
+      expect(
+        document.querySelector('[data-landscape-expanded="true"]'),
+      ).toBeNull();
+      expect(getMainTimerInSegment('round')).toHaveTextContent('0:05');
+      expect(document.body.style.overflow).toBe('');
+    });
+
+    it('locks body scroll while expanded', async () => {
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      render(
+        <RoutineCard
+          training={createTraining({
+            round_number: 1,
+            rest_seconds: 0,
+            duration_seconds: 5,
+          })}
+        />,
+      );
+
+      await user.click(screen.getByRole('button', { name: /^empezar$/i }));
+
+      act(() => {
+        media.setLandscape(true);
+      });
+
+      await waitFor(() => {
+        expect(document.body.style.overflow).toBe('hidden');
+      });
+
+      act(() => {
+        media.setLandscape(false);
+      });
+
+      await waitFor(() => {
+        expect(document.body.style.overflow).toBe('');
+      });
     });
   });
 });

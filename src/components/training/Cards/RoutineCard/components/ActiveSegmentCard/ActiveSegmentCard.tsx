@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useWakeLock } from '@/hooks/useWakeLock';
+import { cn } from '@/lib/helpers/tailwind-styles';
 import type { Training } from '@/types/Trainings';
 import type { SegmentType } from '../../interfaces';
 import SegmentControls from './SegmentControls';
@@ -28,6 +29,7 @@ export interface ActiveSegmentCardProps {
   onPause?: () => void;
   keepScreenOn?: boolean;
   onKeepScreenOnChange?: (keepScreenOn: boolean) => void;
+  isExpanded?: boolean;
 }
 
 export default function ActiveSegmentCard({
@@ -45,6 +47,7 @@ export default function ActiveSegmentCard({
   onPause,
   keepScreenOn = true,
   onKeepScreenOnChange,
+  isExpanded = false,
 }: ActiveSegmentCardProps) {
   const totalTime =
     type === 'round' ? training.duration_seconds : training.rest_seconds;
@@ -105,7 +108,9 @@ export default function ActiveSegmentCard({
 
   return (
     <Card
-      className={`w-full max-w-sm mx-auto transition-colors duration-300 shadow-lg ${
+      className={`w-full mx-auto transition-colors duration-300 shadow-lg ${
+        isExpanded ? 'max-w-none' : 'max-w-sm'
+      } ${
         type === 'round' ? surfaceRound : surfaceRest
       } ${isCompleted ? 'opacity-90' : ''}`}
       data-segment-type={type}
@@ -116,21 +121,27 @@ export default function ActiveSegmentCard({
         trainingTitle={training.training_title}
         currentRound={currentRound}
         totalRounds={totalRounds}
+        isExpanded={isExpanded}
       />
 
-      <CardContent className="text-center space-y-4">
+      <CardContent
+        className={cn('text-center', isExpanded ? 'space-y-2' : 'space-y-4')}
+      >
         <SegmentTimer
           type={type}
           timeLeft={timeLeft}
           progress={progress}
           isCompleted={isCompleted}
+          isExpanded={isExpanded}
         />
 
-        <SegmentStats
-          type={type}
-          durationSeconds={training.duration_seconds}
-          restSeconds={training.rest_seconds}
-        />
+        {!isExpanded && (
+          <SegmentStats
+            type={type}
+            durationSeconds={training.duration_seconds}
+            restSeconds={training.rest_seconds}
+          />
+        )}
 
         <SegmentControls
           type={type}

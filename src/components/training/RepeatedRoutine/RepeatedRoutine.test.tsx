@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import RepeatedRoutine from './RepeatedRoutine';
 import type { Training } from '@/types/Trainings';
 import { Sound } from '@/lib/utils/sound';
+import { mockMatchMedia } from '@/test-helpers/mockMatchMedia';
 
 const mockPlay = jest.fn().mockResolvedValue(undefined);
 const mockStop = jest.fn();
@@ -255,5 +256,35 @@ describe('RepeatedRoutine', () => {
 
     expect(screen.getByText(/Paso 1 de 3/)).toBeInTheDocument();
     expect(screen.queryByText(/^Ciclo 1$/)).not.toBeInTheDocument();
+  });
+
+  describe('landscape expansion', () => {
+    let media: ReturnType<typeof mockMatchMedia>;
+
+    beforeEach(() => {
+      media = mockMatchMedia(false);
+    });
+
+    afterEach(() => {
+      media.restore();
+      document.body.style.overflow = '';
+    });
+
+    it('expands only the active cycle card in landscape', async () => {
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      render(<RepeatedRoutine training={createHiitTraining({ repetitions: 3 })} />);
+
+      await user.click(getInteractiveStartButtons()[0]);
+
+      act(() => {
+        media.setLandscape(true);
+      });
+
+      await waitFor(() => {
+        expect(
+          document.querySelectorAll('[data-landscape-expanded="true"]'),
+        ).toHaveLength(1);
+      });
+    });
   });
 });
