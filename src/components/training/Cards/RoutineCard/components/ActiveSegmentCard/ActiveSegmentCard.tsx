@@ -1,7 +1,7 @@
 'use client';
 
+import { useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useWakeLock } from '@/hooks/useWakeLock';
 import { cn } from '@/lib/helpers/tailwind-styles';
 import type { Training } from '@/types/Trainings';
 import type { SegmentType } from '../../interfaces';
@@ -29,6 +29,8 @@ export interface ActiveSegmentCardProps {
   onPause?: () => void;
   keepScreenOn?: boolean;
   onKeepScreenOnChange?: (keepScreenOn: boolean) => void;
+  screenLockActive?: boolean;
+  onSessionPausedChange?: (paused: boolean) => void;
   isExpanded?: boolean;
 }
 
@@ -47,6 +49,8 @@ export default function ActiveSegmentCard({
   onPause,
   keepScreenOn = true,
   onKeepScreenOnChange,
+  screenLockActive = false,
+  onSessionPausedChange,
   isExpanded = false,
 }: ActiveSegmentCardProps) {
   const totalTime =
@@ -75,9 +79,9 @@ export default function ActiveSegmentCard({
     onPause,
   });
 
-  const { isActive: screenLockActive } = useWakeLock({
-    enabled: keepScreenOn && isRunning && !isPaused,
-  });
+  useEffect(() => {
+    onSessionPausedChange?.(isPaused);
+  }, [isPaused, onSessionPausedChange]);
 
   const handleStartOrResume = (withScreenOn: boolean) => {
     onKeepScreenOnChange?.(withScreenOn);

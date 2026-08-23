@@ -8,6 +8,22 @@ import { mockMatchMedia } from '@/test-helpers/mockMatchMedia';
 const mockPlay = jest.fn().mockResolvedValue(undefined);
 const mockStop = jest.fn();
 
+const wakeLockState = { enabled: false };
+
+jest.mock('@/hooks/useWakeLock', () => ({
+  useWakeLock: ({ enabled }: { enabled: boolean }) => {
+    wakeLockState.enabled = enabled;
+    return { isSupported: true, isActive: enabled };
+  },
+}));
+
+jest.mock('@/hooks/useKeepScreenOnPreference', () => ({
+  useKeepScreenOnPreference: () => ({
+    keepScreenOn: true,
+    setKeepScreenOn: jest.fn(),
+  }),
+}));
+
 jest.mock('@/lib/utils/sound', () => ({
   Sound: jest.fn(() => ({
     play: mockPlay,
@@ -48,6 +64,7 @@ async function advanceMs(ms: number) {
 describe('RepeatedRoutine', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    wakeLockState.enabled = false;
     jest.useFakeTimers();
   });
 
@@ -256,6 +273,144 @@ describe('RepeatedRoutine', () => {
 
     expect(screen.getByText(/Paso 1 de 3/)).toBeInTheDocument();
     expect(screen.queryByText(/^Ciclo 1$/)).not.toBeInTheDocument();
+  });
+
+  describe('session wake lock', () => {
+    it('enables wake lock when the session starts', async () => {
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      render(
+        <RepeatedRoutine
+          training={createHiitTraining({
+            repetitions: 0,
+            round_number: 2,
+            duration_seconds: 5,
+            rest_seconds: 3,
+          })}
+        />,
+      );
+
+      expect(wakeLockState.enabled).toBe(false);
+
+      await user.click(screen.getByRole('button', { name: /^empezar$/i }));
+
+      expect(wakeLockState.enabled).toBe(true);
+    });
+
+    it('keeps wake lock enabled when transitioning from round to rest', async () => {
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      render(
+        <RepeatedRoutine
+          training={createHiitTraining({
+            repetitions: 0,
+            round_number: 2,
+            duration_seconds: 2,
+            rest_seconds: 3,
+          })}
+        />,
+      );
+
+      await user.click(screen.getByRole('button', { name: /^empezar$/i }));
+      expect(wakeLockState.enabled).toBe(true);
+
+      await advanceMs(2000);
+
+      await waitFor(() => {
+        expect(
+          screen.getByText(/Descanso · después del round 1/i),
+        ).toBeInTheDocument();
+      });
+
+      expect(wakeLockState.enabled).toBe(true);
+    });
+
+    it('keeps wake lock enabled when advancing to the next HIIT cycle', async () => {
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      render(
+        <RepeatedRoutine
+          training={createHiitTraining({
+            repetitions: 2,
+            round_number: 1,
+            duration_seconds: 5,
+          })}
+        />,
+      );
+
+      await user.click(getInteractiveStartButtons()[0]);
+      expect(wakeLockState.enabled).toBe(true);
+
+      await advanceMs(5000);
+      await advanceMs(500);
+
+      expect(screen.getByText('Ciclo 2')).toBeInTheDocument();
+      expect(wakeLockState.enabled).toBe(true);
+    });
+
+    it('disables wake lock when the session is paused', async () => {
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      render(
+        <RepeatedRoutine
+          training={createHiitTraining({
+            repetitions: 0,
+            round_number: 1,
+            duration_seconds: 5,
+          })}
+        />,
+      );
+
+      await user.click(screen.getByRole('button', { name: /^empezar$/i }));
+      expect(wakeLockState.enabled).toBe(true);
+
+      await user.click(screen.getByRole('button', { name: /pausar/i }));
+
+      expect(wakeLockState.enabled).toBe(false);
+    });
+
+    it('disables wake lock when the user resets the routine', async () => {
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      render(
+        <RepeatedRoutine
+          training={createHiitTraining({
+            repetitions: 0,
+            round_number: 1,
+            duration_seconds: 5,
+          })}
+        />,
+      );
+
+      await user.click(screen.getByRole('button', { name: /^empezar$/i }));
+      expect(wakeLockState.enabled).toBe(true);
+
+      await user.click(screen.getByRole('button', { name: /pausar/i }));
+      await user.click(screen.getByRole('button', { name: /reset/i }));
+
+      expect(wakeLockState.enabled).toBe(false);
+    });
+
+    it('disables wake lock when the full session finishes', async () => {
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      render(
+        <RepeatedRoutine
+          training={createHiitTraining({
+            repetitions: 0,
+            round_number: 1,
+            duration_seconds: 1,
+          })}
+        />,
+      );
+
+      await user.click(screen.getByRole('button', { name: /^empezar$/i }));
+      expect(wakeLockState.enabled).toBe(true);
+
+      await advanceMs(1000);
+
+      await waitFor(() => {
+        expect(
+          screen.getByText(/rutina completada/i),
+        ).toBeInTheDocument();
+      });
+
+      expect(wakeLockState.enabled).toBe(false);
+    });
   });
 
   describe('landscape expansion', () => {

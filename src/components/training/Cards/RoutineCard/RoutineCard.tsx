@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Maximize2, Minimize2 } from 'lucide-react';
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
-import { useKeepScreenOnPreference } from '@/hooks/useKeepScreenOnPreference';
 import { useLandscapeExpanded } from '@/hooks/useLandscapeExpanded';
 import { cn } from '@/lib/helpers/tailwind-styles';
 import type { Training } from '@/types/Trainings';
@@ -26,6 +25,15 @@ export interface RoutineCardProps {
   cycleNumber?: number;
   /** HIIT: añade un descanso final tras el último round (ciclos no finales). */
   trailingRest?: boolean;
+  /** Preferencia de mantener pantalla encendida (sesión). */
+  keepScreenOn?: boolean;
+  onKeepScreenOnChange?: (keepScreenOn: boolean) => void;
+  /** Estado del wake lock gestionado por el padre de sesión. */
+  screenLockActive?: boolean;
+  onSessionStart?: () => void;
+  onSessionPausedChange?: (paused: boolean) => void;
+  onSessionReset?: () => void;
+  onSessionFinished?: () => void;
 }
 
 export default function RoutineCard({
@@ -35,6 +43,13 @@ export default function RoutineCard({
   onComplete,
   cycleNumber,
   trailingRest = false,
+  keepScreenOn = true,
+  onKeepScreenOnChange,
+  screenLockActive = false,
+  onSessionStart,
+  onSessionPausedChange,
+  onSessionReset,
+  onSessionFinished,
 }: RoutineCardProps) {
   const totalRounds = Math.max(0, Math.floor(training.round_number));
   const isControlled = onComplete != null;
@@ -45,7 +60,6 @@ export default function RoutineCard({
 
   const [currentCard, setCurrentCard] = useState(0);
   const [hasStarted, setHasStarted] = useState(false);
-  const { keepScreenOn, setKeepScreenOn } = useKeepScreenOnPreference();
 
   const bellSound = useMemo(
     () => new Sound('/sounds/boxing-bell-liviano.mp3', 0.5),
@@ -61,7 +75,8 @@ export default function RoutineCard({
     if (disabled) return;
     bellSound.play();
     setHasStarted(true);
-  }, [bellSound, disabled]);
+    onSessionStart?.();
+  }, [bellSound, disabled, onSessionStart]);
 
   const stopAllSounds = useCallback(() => {
     bellSound.stop();
@@ -76,7 +91,8 @@ export default function RoutineCard({
     stopAllSounds();
     setCurrentCard(0);
     setHasStarted(false);
-  }, [stopAllSounds]);
+    onSessionReset?.();
+  }, [stopAllSounds, onSessionReset]);
 
   const handleSegmentComplete = useCallback(() => {
     if (disabled) return;
@@ -118,12 +134,18 @@ export default function RoutineCard({
     if (disabled || !autoStart || hasStarted) return;
     bellSound.play();
     setHasStarted(true);
-  }, [autoStart, disabled, hasStarted, bellSound]);
+    onSessionStart?.();
+  }, [autoStart, disabled, hasStarted, bellSound, onSessionStart]);
 
   useEffect(() => {
     if (!isFinished || !isControlled) return;
     onComplete();
   }, [isFinished, isControlled, onComplete]);
+
+  useEffect(() => {
+    if (!isFinished || isControlled || disabled) return;
+    onSessionFinished?.();
+  }, [isFinished, isControlled, disabled, onSessionFinished]);
 
   useEffect(() => {
     if (!isFinished || isControlled) return;
@@ -196,7 +218,9 @@ export default function RoutineCard({
         onReset={handleReset}
         onPause={handlePause}
         keepScreenOn={keepScreenOn}
-        onKeepScreenOnChange={setKeepScreenOn}
+        onKeepScreenOnChange={onKeepScreenOnChange}
+        screenLockActive={screenLockActive}
+        onSessionPausedChange={disabled ? undefined : onSessionPausedChange}
         isExpanded={isExpanded}
       />
 
