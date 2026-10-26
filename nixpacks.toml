@@ -1,3 +1,6 @@
+# Unused while railway.toml sets builder = "DOCKERFILE".
+# Node 22.23.4 is pinned in the Dockerfile. Nixpacks only honors the
+# major version here, so this file cannot select the security patch.
 [variables]
 NIXPACKS_NODE_VERSION = "22"
 

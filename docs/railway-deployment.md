@@ -14,7 +14,7 @@ Referencia de scripts: [scripts.md](./scripts.md) · Índice de docs: [README.md
 
 1. Entrá a [railway.com/new](https://railway.com/new).
 2. Elegí **Deploy from GitHub repo** y conectá el repositorio de esta app.
-3. Railway detectará Next.js vía Nixpacks y usará [`railway.toml`](../railway.toml).
+3. Railway usará el [`Dockerfile`](../Dockerfile) (Node 22.23.4) porque [`railway.toml`](../railway.toml) fija `builder = "DOCKERFILE"`.
 
 ## 2. Crear volumen persistente para SQLite
 
@@ -68,7 +68,7 @@ Para desarrollo local, copiá `.env.example` a `.env.local` y completá las cont
 
 Tras conectar el repo y configurar volumen + variables:
 
-1. Railway hará build con `pnpm install && pnpm build`.
+1. Railway construirá la imagen del `Dockerfile`: `pnpm install --frozen-lockfile --config.production=false` y después `pnpm build`, sobre Node 22.23.4.
 2. Al arrancar, `src/lib/db.ts` crea las tablas si no existen y **migra el esquema legado** (`trainings.user_id`) al modelo normalizado si corresponde.
 3. Generá dominio público (Settings → **Networking** → **Generate Domain**).
 4. Ejecutá el seed de usuarios y rutinas (Railway inyecta las variables del servicio):
@@ -153,8 +153,9 @@ La app abre en pantalla completa; los datos siguen viniendo del servidor (requie
 | Problema | Causa probable | Solución |
 |----------|----------------|----------|
 | DB vacía tras redeploy | Sin volumen o `DB_PATH` incorrecto | Montar volumen en `/data` y setear `DB_PATH=/data/training.db` |
-| Error al compilar `better-sqlite3` | Build sin dependencias nativas | Nixpacks + `pnpm.onlyBuiltDependencies` en `package.json` |
+| Error al compilar `better-sqlite3` | Build sin dependencias nativas | El `Dockerfile` instala `python3`, `make` y `g++`. `package.json` permite el build de `better-sqlite3` |
 | Login falla en prod | Cookie no segura / usuario inexistente / vars de seed faltantes / DB efímera | `NODE_ENV=production`, `DB_PATH=/data/training.db`, volumen `/data`, ejecutar `seed-all.mjs` vía SSH |
-| Build falla con `spawn yarn ENOENT` / TypeScript not found | `NODE_ENV=production` en Railway omite `devDependencies` en `pnpm install` | El `buildCommand` en `railway.toml` usa `pnpm install --config.production=false` para instalar TypeScript, Tailwind y ESLint durante el build |
-| Build falla en "Collecting page data" | `DB_PATH=/data/...` en build sin volumen | No poner `DB_PATH` en `nixpacks.toml`; solo en Variables de Railway en runtime |
+| Build falla con `spawn yarn ENOENT` / TypeScript not found | `NODE_ENV=production` en Railway omite `devDependencies` en `pnpm install` | El `Dockerfile` instala con `pnpm install --frozen-lockfile --config.production=false` para incluir TypeScript, Tailwind y ESLint durante el build |
+| Build falla en "Collecting page data" | `DB_PATH=/data/...` en build sin volumen | No poner `DB_PATH` en el `Dockerfile`; solo en Variables de Railway en runtime |
+| `railway ssh -- node -v` no es 22.23.4 | El servicio sigue en Nixpacks | Confirmar que `railway.toml` tiene `builder = "DOCKERFILE"` y que el deploy salió de este commit |
 | App duerme | Free tier | Upgrade a Hobby o aceptar cold start |
